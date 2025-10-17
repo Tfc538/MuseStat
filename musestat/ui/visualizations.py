@@ -21,19 +21,16 @@ def create_sparkline(values: List[float], width: int = 20, height: int = 8) -> s
     if not values:
         return "─" * width
     
-    # Normalize values to 0-height range
     min_val = min(values)
     max_val = max(values)
     value_range = max_val - min_val if max_val != min_val else 1
     
-    # Sample values if there are more than width
     if len(values) > width:
         step = len(values) / width
         sampled_values = [values[int(i * step)] for i in range(width)]
     else:
         sampled_values = values
     
-    # Unicode block characters for sparkline (8 heights)
     blocks = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█']
     
     sparkline = ""
@@ -77,14 +74,12 @@ def create_vertical_bar_chart(data: List[Tuple[str, float]], max_height: int = 1
     if not data:
         return ["No data to display"]
     
-    # Find max value for normalization
     max_val = max(val for _, val in data)
     if max_val == 0:
         max_val = 1
     
     lines = []
     
-    # Create the bars from top to bottom
     for h in range(max_height, 0, -1):
         line = ""
         for label, value in data:
@@ -95,17 +90,14 @@ def create_vertical_bar_chart(data: List[Tuple[str, float]], max_height: int = 1
                 line += "  "
         lines.append(line)
     
-    # Add value labels
     value_line = ""
     for label, value in data:
-        value_str = f"{value:,.0f}"[:2]  # Truncate to 2 chars
+        value_str = f"{value:,.0f}"[:2]
         value_line += value_str + " " * (2 - len(value_str) + 1)
     lines.append(value_line)
     
-    # Add separator
     lines.append("─" * (len(data) * 2))
     
-    # Add labels (truncated)
     label_line = ""
     for label, _ in data:
         truncated = label[:2] if len(label) >= 2 else label + " "
@@ -136,8 +128,7 @@ def create_simple_pie_chart(data: List[Tuple[str, float]], width: int = 40) -> L
     lines = []
     pie_chars = ['█', '▓', '▒', '░', '▪', '▫', '●', '○', '◆', '◇']
     
-    # Create visual representation
-    bar_width = width - 20  # Reserve space for labels
+    bar_width = width - 20
     for i, (label, value) in enumerate(data):
         percentage = (value / total) * 100
         filled = int((percentage / 100) * bar_width)
@@ -165,19 +156,16 @@ def create_heat_map_line(values: List[float], width: int = 50) -> str:
     if not values:
         return "─" * width
     
-    # Normalize values
     min_val = min(values)
     max_val = max(values)
     value_range = max_val - min_val if max_val != min_val else 1
     
-    # Sample values if needed
     if len(values) > width:
         step = len(values) / width
         sampled = [values[int(i * step)] for i in range(width)]
     else:
         sampled = values + [values[-1]] * (width - len(values))
     
-    # Characters representing different intensities
     intensities = [' ', '░', '▒', '▓', '█']
     
     heatmap = ""
@@ -226,7 +214,6 @@ def get_readability_indicator(score: float, metric_type: str = "flesch") -> Tupl
         Tuple of (symbol, color, interpretation)
     """
     if metric_type == "flesch":
-        # Flesch Reading Ease: higher is better
         if score >= 70:
             return "●", "bright_green", "Easy"
         elif score >= 50:
@@ -235,7 +222,6 @@ def get_readability_indicator(score: float, metric_type: str = "flesch") -> Tupl
             return "●", "red", "Difficult"
     
     elif metric_type in ["grade", "fog"]:
-        # Grade level: lower is easier
         if score <= 8:
             return "●", "bright_green", "Easy"
         elif score <= 12:
@@ -243,7 +229,6 @@ def get_readability_indicator(score: float, metric_type: str = "flesch") -> Tupl
         else:
             return "●", "red", "Difficult"
     
-    # Default
     return "●", "white", "Unknown"
 
 
@@ -292,7 +277,6 @@ def create_chapter_balance_visualization(chapter_lengths: List[int], target_leng
     
     lines = []
     
-    # Calculate statistics
     mean_length = sum(chapter_lengths) / len(chapter_lengths)
     min_length = min(chapter_lengths)
     max_length = max(chapter_lengths)
@@ -300,19 +284,15 @@ def create_chapter_balance_visualization(chapter_lengths: List[int], target_leng
     if target_length is None:
         target_length = mean_length
     
-    # Create sparkline
     sparkline = create_sparkline(chapter_lengths, width=40)
     lines.append(f"Trend: {sparkline}")
     lines.append("")
     
-    # Create balance indicator
     lines.append("Chapter Balance:")
     for i, length in enumerate(chapter_lengths, 1):
-        # Calculate deviation from target
         deviation = abs(length - target_length) / target_length if target_length else 0
         
-        # Visual indicator
-        if deviation < 0.15:  # Within 15%
+        if deviation < 0.15:
             indicator = "●"
             color = "bright_green"
             status = "Balanced"
@@ -320,12 +300,11 @@ def create_chapter_balance_visualization(chapter_lengths: List[int], target_leng
             indicator = "●"
             color = "yellow"
             status = "Acceptable"
-        else:  # More than 30%
+        else:
             indicator = "●"
             color = "red"
             status = "Unbalanced"
         
-        # Create mini bar
         normalized = length / max_length if max_length else 0
         bar_length = int(normalized * 20)
         bar = "█" * bar_length
@@ -360,17 +339,14 @@ def create_progress_forecast(current_words: int, target_words: int, days_worked:
     
     content = Text()
     
-    # Progress bar
     progress_pct = (current_words / target_words * 100) if target_words > 0 else 0
     bar = create_horizontal_bar(progress_pct, width=30)
     content.append(f"{bar} {progress_pct:.1f}%\n\n", style="cyan")
     
-    # Current status
     content.append(f"Current:  {current_words:>8,} words\n", style="white")
     content.append(f"Target:   {target_words:>8,} words\n", style="white")
     content.append(f"Remaining:{remaining:>8,} words\n\n", style="yellow")
     
-    # Forecast
     if words_per_day > 0 and remaining > 0:
         days_remaining = int(remaining / words_per_day)
         content.append(f"Velocity: {words_per_day:>8,.0f} words/day\n", style="cyan")
@@ -398,19 +374,16 @@ def create_mini_histogram(values: List[float], bins: int = 10, width: int = 40) 
     if not values:
         return ["No data to display"]
     
-    # Calculate bins
     min_val = min(values)
     max_val = max(values)
     value_range = max_val - min_val if max_val != min_val else 1
     bin_size = value_range / bins
     
-    # Count values in each bin
     bin_counts = [0] * bins
     for val in values:
         bin_index = min(int((val - min_val) / bin_size), bins - 1)
         bin_counts[bin_index] += 1
     
-    # Create histogram
     max_count = max(bin_counts) if bin_counts else 1
     lines = []
     
@@ -418,7 +391,6 @@ def create_mini_histogram(values: List[float], bins: int = 10, width: int = 40) 
         bin_start = min_val + (i * bin_size)
         bin_end = min_val + ((i + 1) * bin_size)
         
-        # Create bar
         bar_length = int((count / max_count) * (width - 25))
         bar = "█" * bar_length
         
@@ -443,7 +415,6 @@ def get_metric_color(value: float, thresholds: Tuple[float, float], reverse: boo
     good_threshold, fair_threshold = thresholds
     
     if not reverse:
-        # Higher is better
         if value >= good_threshold:
             return "bright_green"
         elif value >= fair_threshold:
@@ -451,7 +422,6 @@ def get_metric_color(value: float, thresholds: Tuple[float, float], reverse: boo
         else:
             return "red"
     else:
-        # Lower is better
         if value <= good_threshold:
             return "bright_green"
         elif value <= fair_threshold:

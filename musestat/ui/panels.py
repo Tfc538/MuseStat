@@ -109,7 +109,6 @@ def create_chapter_stats_panel(chapter_stats: Dict, chapter_lengths: Optional[Li
     content = Text()
     content.append("Chapter Length Analysis\n\n", style="bold underline cyan")
     
-    # Add sparkline if chapter lengths provided
     if chapter_lengths and len(chapter_lengths) > 0:
         width = min(sparkline_width, len(chapter_lengths) * 2)
         sparkline = create_sparkline(chapter_lengths, width=width)
@@ -119,7 +118,6 @@ def create_chapter_stats_panel(chapter_stats: Dict, chapter_lengths: Optional[Li
     content.append(f"Mean:      {chapter_stats['mean']:,.0f} words\n", style="white")
     content.append(f"Std Dev:   {chapter_stats['std_dev']:,.0f} words\n", style="white")
     
-    # Add balance indicator based on coefficient of variation
     cv = chapter_stats['coefficient_of_variation']
     if cv < 15:
         balance_text = "Very Consistent"
@@ -163,17 +161,14 @@ def create_achievement_badge_panel(badge: Dict) -> Panel:
     content = Text()
     
     if badge.get('newly_unlocked'):
-        # Just unlocked!
         content.append("🎉 ACHIEVEMENT UNLOCKED! 🎉\n\n", style="bold bright_yellow")
         content.append(f"{badge['icon']} {badge['title']}\n", style="bold bright_green")
         content.append(f"{badge['message']}\n", style="italic cyan")
     elif badge['unlocked']:
-        # Already achieved
         content.append("Current Status\n\n", style="bold underline cyan")
         content.append(f"{badge['icon']} {badge['title']}\n", style="bold bright_green")
         content.append(f"{badge['message']}", style="italic dim")
     else:
-        # Not yet achieved
         content.append("Next Milestone\n\n", style="bold underline cyan")
         content.append(f"{badge['icon']} {badge['title']}\n", style="bold yellow")
         content.append(f"{badge['message']}", style="italic dim")
@@ -248,10 +243,8 @@ def create_compact_display(stats: Dict) -> Panel:
     
     content = Text()
     
-    # Title
     content.append("MuseStat Quick Summary\n\n", style="bold cyan")
     
-    # Essential stats
     content.append("Words:       ", style="bold")
     content.append(f"{total_words:,}\n", style="bold bright_yellow")
     
@@ -276,7 +269,6 @@ def create_compact_display(stats: Dict) -> Panel:
     
     content.append("\n")
     
-    # Milestone indicator
     milestones = [(50000, "Novel (Short)", "📗"), (80000, "Novel (Standard)", "📘"), 
                   (100000, "Novel (Long)", "📙"), (120000, "Epic Novel", "📚")]
     
@@ -293,7 +285,6 @@ def create_compact_display(stats: Dict) -> Panel:
         remaining = 50000 - total_words
         content.append(f"{remaining:,} words to Novel (Short)", style="yellow")
     
-    # Add badge if available
     if stats.get('badge'):
         badge = stats['badge']
         content.append("\n\n")
@@ -358,19 +349,15 @@ def create_verification_summary(issues) -> Panel:
     content = Text()
     content.append("Verification Summary\n\n", style="bold underline white")
     
-    # Errors
     error_style = "bold red" if errors > 0 else "dim"
     content.append(f"{'🔴' if errors > 0 else '✓'} Errors:   {errors:>4}\n", style=error_style)
     
-    # Warnings
     warning_style = "bold yellow" if warnings > 0 else "dim"
     content.append(f"{'⚠️ ' if warnings > 0 else '✓'} Warnings: {warnings:>4}\n", style=warning_style)
     
-    # Info
     info_style = "bold cyan" if info > 0 else "dim"
     content.append(f"{'ℹ️ ' if info > 0 else '✓'} Info:     {info:>4}\n\n", style=info_style)
     
-    # Category breakdown
     if issues:
         categories = {}
         for issue in issues:
@@ -382,7 +369,6 @@ def create_verification_summary(issues) -> Panel:
             content.append(f"  • {cat}: {count}\n", style="dim")
         content.append("\n")
     
-    # Overall status
     if errors == 0 and warnings == 0 and info == 0:
         content.append("✨ Manuscript is ready for publishing! ✨", style="bold bright_green")
     elif errors == 0 and warnings == 0:
@@ -418,23 +404,19 @@ def create_density_heat_map_panel(chapters: List[Dict]) -> Optional[Panel]:
     content = Text()
     content.append("Chapter Density Analysis\n\n", style="bold underline cyan")
     
-    # Extract data for heat map
     chapter_lengths = [ch.get('words', 0) for ch in chapters]
     
-    # Create heat map for chapter word counts
     if chapter_lengths:
         heatmap = create_heat_map_line(chapter_lengths, width=50)
         content.append("Word Density:  ", style="bold white")
         content.append(f"{heatmap}\n", style="bright_cyan")
         
-        # Add legend
         min_words = min(chapter_lengths)
         max_words = max(chapter_lengths)
         content.append(f"               [{min_words:,} words", style="dim")
         content.append(" " * 30, style="dim")
         content.append(f"{max_words:,} words]\n\n", style="dim")
     
-    # If we have sentence data, show that too
     if chapters and 'sentences' in chapters[0]:
         sentence_counts = [ch.get('sentences', 0) for ch in chapters]
         if any(sentence_counts):
@@ -448,7 +430,6 @@ def create_density_heat_map_panel(chapters: List[Dict]) -> Optional[Panel]:
             content.append(" " * 25, style="dim")
             content.append(f"{max_sent:,} sentences]\n\n", style="dim")
     
-    # Add interpretation
     content.append("\nInterpretation:\n", style="bold dim")
     content.append("  █ = High density  |  ░ = Low density", style="dim")
     

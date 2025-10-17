@@ -61,7 +61,6 @@ def display_statistics(
             - hide_chapter_details: Hide chapter breakdown table
             - show_top_chapters: Show top N longest chapters
     """
-    # Default display options
     if display_options is None:
         display_options = {}
     
@@ -74,7 +73,6 @@ def display_statistics(
     show_top_chapters = display_options.get('show_top_chapters')
     console.clear()
     
-    # Show loading animation (shorter for compact modes)
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -89,18 +87,15 @@ def display_statistics(
             time.sleep(sleep_time)
     
     if semi_compact:
-        # Semi-compact mode: Nice overview with key highlights
         console.print(create_header())
         console.print()
         
-        # Show overview and milestone side by side
         if comparison_stats:
             console.print(Columns([
                 create_semi_compact_overview(stats),
                 create_comparison_panel(stats, comparison_stats)
             ], equal=True, expand=True))
             
-            # Check for newly unlocked badges
             prev_words = comparison_stats.get('total_words', 0)
             badge = get_achievement_badge(stats['total_words'], prev_words)
             if badge.get('newly_unlocked'):
@@ -114,7 +109,6 @@ def display_statistics(
         
         console.print()
         
-        # Show achievement badge and motivation
         if stats.get('badge'):
             console.print(Columns([
                 create_achievement_badge_panel(stats['badge']),
@@ -137,16 +131,13 @@ def display_statistics(
         ))
     
     elif compact:
-        # Compact mode: Just show essential stats
         console.print(create_compact_display(stats))
         console.print()
         
-        # Show comparison if available
         if comparison_stats:
             prev_words = comparison_stats.get('total_words', 0)
             badge = get_achievement_badge(stats['total_words'], prev_words)
             
-            # If newly unlocked, show achievement!
             if badge.get('newly_unlocked'):
                 console.print(create_achievement_badge_panel(badge))
                 console.print()
@@ -154,7 +145,6 @@ def display_statistics(
             console.print(create_comparison_panel(stats, comparison_stats))
             console.print()
         
-        # Show motivational quote
         console.print(create_motivation_panel())
         console.print()
         
@@ -172,11 +162,9 @@ def display_statistics(
             padding=(0, 1)
         ))
     else:
-        # Full mode: Show all details
         console.print(create_header())
         console.print()
         
-        # Display overview and milestones/comparison side by side
         if comparison_stats:
             console.print(Columns([
                 create_overview_table(stats),
@@ -190,7 +178,6 @@ def display_statistics(
         
         console.print()
         
-        # Display advanced metrics if enabled
         if show_advanced:
             if stats.get('readability'):
                 table = create_readability_table(stats['readability'])
@@ -204,7 +191,6 @@ def display_statistics(
                     console.print(table)
                     console.print()
         
-        # Display chapter statistics
         if stats.get('chapter_stats') and stats['chapter_stats']:
             chapter_lengths = [ch['words'] for ch in stats['chapters']] if stats.get('chapters') else None
             panel = create_chapter_stats_panel(stats['chapter_stats'], chapter_lengths, sparkline_width=sparkline_width)
@@ -212,33 +198,27 @@ def display_statistics(
                 console.print(panel)
                 console.print()
         
-        # Display density heat map (unless hidden)
         if not hide_heat_map and stats.get('chapters') and len(stats['chapters']) > 1:
             heat_map_panel = create_density_heat_map_panel(stats['chapters'])
             if heat_map_panel:
                 console.print(heat_map_panel)
                 console.print()
         
-        # Display top chapters summary if requested
         if show_top_chapters and stats['chapters']:
             from .tables import create_top_chapters_table
             console.print(create_top_chapters_table(stats['chapters'], n=show_top_chapters))
             console.print()
         
-        # Display chapters table (unless hidden)
         if not hide_chapter_details and stats['chapters']:
             console.print(create_chapters_table(stats['chapters'], max_chapters=max_chapters, sparkline_width=sparkline_width))
             console.print()
         
-        # Display word frequency (unless hidden)
         if not hide_word_frequency:
             console.print(create_word_frequency_table(stats['common_words'], max_words=top_words))
             console.print()
         
-        # Display achievement badge and motivation
         if stats.get('badge'):
             badge = stats['badge']
-            # Check if newly unlocked by comparison
             if comparison_stats:
                 prev_words = comparison_stats.get('total_words', 0)
                 badge = get_achievement_badge(stats['total_words'], prev_words)

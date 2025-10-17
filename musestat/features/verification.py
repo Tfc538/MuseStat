@@ -44,11 +44,9 @@ def load_ignore_patterns() -> List[str]:
             with open(ignore_file, 'r', encoding='utf-8') as f:
                 for line in f:
                     line = line.strip()
-                    # Skip empty lines and comments
                     if line and not line.startswith('#'):
                         patterns.append(line)
         except Exception:
-            # Silently fail if we can't read the file
             pass
     
     return patterns
@@ -75,22 +73,15 @@ def should_ignore_line(line: str, line_number: int, ignore_patterns: List[str]) 
     line_lower = line.lower()
     
     for pattern in ignore_patterns:
-        # Handle simple wildcards (* and ?)
         if '*' in pattern or '?' in pattern:
-            # Use simple string matching for wildcards instead of regex
-            # This is much faster and avoids catastrophic backtracking
             pattern_lower = pattern.lower()
-            
-            # Split by * to get parts that must appear in order
             parts = pattern_lower.split('*')
             
-            # Check if all parts appear in order
             pos = 0
             match = True
             for part in parts:
-                if not part:  # Empty part from leading/trailing *
+                if not part:
                     continue
-                # Handle ? wildcards in this part
                 if '?' in part:
                     # Convert to simple regex for single character matching
                     part_regex = part.replace('?', '.')
@@ -105,7 +96,6 @@ def should_ignore_line(line: str, line_number: int, ignore_patterns: List[str]) 
                         match = False
                         break
                 else:
-                    # Simple text search
                     idx = line_lower.find(part, pos)
                     if idx == -1:
                         match = False
@@ -114,19 +104,15 @@ def should_ignore_line(line: str, line_number: int, ignore_patterns: List[str]) 
             
             if match:
                 return True
-                
-        # Handle "starts with" pattern (^)
+
         elif pattern.startswith('^'):
             check_pattern = pattern[1:].lower()
             if line_lower.startswith(check_pattern):
                 return True
-                
-        # Plain text or regex
+
         else:
-            # Try simple text match first (fast)
             if pattern.lower() in line_lower:
                 return True
-            # Try as regex for advanced users (only if text match fails)
             try:
                 if re.search(pattern, line, re.IGNORECASE):
                     return True
@@ -150,12 +136,10 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
     if ignore_patterns is None:
         ignore_patterns = load_ignore_patterns()
     
-    # Cache for ignored lines to avoid repeated checks
     ignored_lines_cache = {}
     has_patterns = len(ignore_patterns) > 0
     
     def is_line_ignored(line: str, line_num: int) -> bool:
-        """Check if line should be ignored (with caching)."""
         if not has_patterns:
             return False
         if line_num in ignored_lines_cache:
@@ -168,7 +152,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
     lines = text.split('\n')
     in_code_block = False
     
-    # 1. Check for unmatched emphasis markers (*, **, _)
     for i, line in enumerate(lines, 1):
         if is_line_ignored(line, i):
             continue
@@ -180,9 +163,8 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
         if in_code_block:
             continue
         
-        # Check for unmatched single asterisks
         single_asterisks = len(re.findall(r'(?<!\*)\*(?!\*)', line))
-        if single_asterisks % 2 != 0 and not re.match(r'^\s*\*\s', line):  # Not a bullet point
+        if single_asterisks % 2 != 0 and not re.match(r'^\s*\*\s', line):
             preview = line.strip()[:70]
             issues.append(Issue(
                 type=IssueType.ERROR,
@@ -193,7 +175,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 suggestion="Ensure all * have matching pairs"
             ))
         
-        # Check for unmatched double asterisks
         double_asterisks = len(re.findall(r'(?<!\*)\*\*(?!\*)', line))
         if double_asterisks % 2 != 0:
             preview = line.strip()[:70]
@@ -206,7 +187,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 suggestion="Ensure all ** have matching pairs"
             ))
         
-        # Check for triple asterisks (likely error)
         if '***' in line and not re.match(r'^\s*\*\*\*\s*$', line):
             preview = line.strip()[:70]
             issues.append(Issue(
@@ -218,9 +198,8 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 suggestion="Use ** for bold or * for italic, or *** for scene break"
             ))
         
-        # Check for unmatched underscores
         underscores = len(re.findall(r'(?<!_)_(?!_)', line))
-        if underscores % 2 != 0 and not re.search(r'\w+_\w+', line):  # Not snake_case
+        if underscores % 2 != 0 and not re.search(r'\w+_\w+', line):
             preview = line.strip()[:70]
             issues.append(Issue(
                 type=IssueType.WARNING,
@@ -231,7 +210,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 suggestion="Ensure all _ have matching pairs"
             ))
     
-    # 2. Check for TODO/FIXME markers
     for i, line in enumerate(lines, 1):
         if is_line_ignored(line, i):
             continue
@@ -249,7 +227,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 ))
                 break
     
-    # 3. Check for common typos and repeated words
     for i, line in enumerate(lines, 1):
         if is_line_ignored(line, i):
             continue
@@ -275,12 +252,10 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                     suggestion="Remove duplicate word"
                 ))
     
-    # 4. Check punctuation issues
     for i, line in enumerate(lines, 1):
         if is_line_ignored(line, i):
             continue
         
-        # Multiple exclamation/question marks
         if re.search(r'[!?]{2,}', line):
             preview = line.strip()[:70]
             issues.append(Issue(
@@ -292,7 +267,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 suggestion="Use single punctuation for professional writing"
             ))
         
-        # Space before punctuation
         if re.search(r'\s[.,!?;:]', line):
             preview = line.strip()[:70]
             issues.append(Issue(
@@ -304,7 +278,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 suggestion="Remove space before punctuation"
             ))
         
-        # Check for ellipsis issues
         if re.search(r'\.{4,}', line):
             preview = line.strip()[:70]
             issues.append(Issue(
@@ -316,7 +289,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 suggestion="Use three dots (...) or unicode ellipsis (…)"
             ))
         
-        # Check for em-dash vs hyphen
         if ' - ' in line:
             preview = line.strip()[:70]
             issues.append(Issue(
@@ -328,12 +300,10 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 suggestion="Use em-dash (—) without spaces for professional formatting"
             ))
     
-    # 5. Check for whitespace issues
     for i, line in enumerate(lines, 1):
         if is_line_ignored(line, i):
             continue
         
-        # Trailing whitespace
         if line and (line[-1] == ' ' or line[-1] == '\t'):
             issues.append(Issue(
                 type=IssueType.INFO,
@@ -343,7 +313,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 suggestion="Remove trailing spaces/tabs"
             ))
         
-        # Multiple consecutive spaces (not indentation)
         if '  ' in line.strip():
             spaces = re.findall(r' {2,}', line.strip())
             if spaces:
@@ -359,7 +328,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                         suggestion="Use single spaces between words"
                     ))
         
-        # Tabs in content
         if '\t' in line and line.strip():
             preview = line.strip()[:70]
             issues.append(Issue(
@@ -371,7 +339,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 suggestion="Use spaces instead of tabs"
             ))
     
-    # 6. Check heading structure
     prev_level = 0
     
     for i, line in enumerate(lines, 1):
@@ -383,7 +350,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
         if heading_match:
             level = len(heading_match.group(1))
             
-            # Check for proper spacing after #
             if not re.match(r'^#{1,6}\s+\S', line):
                 issues.append(Issue(
                     type=IssueType.ERROR,
@@ -394,7 +360,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                     suggestion="Add space: '# Title' not '#Title'"
                 ))
             
-            # Check for skipped levels
             if prev_level > 0 and level > prev_level + 1:
                 issues.append(Issue(
                     type=IssueType.WARNING,
@@ -407,7 +372,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
             
             prev_level = level
     
-    # 7. Check for smart quotes consistency
     straight_double = text.count('"')
     curly_double = text.count(""") + text.count(""")
     
@@ -419,12 +383,10 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
             suggestion="Use consistent quote style throughout manuscript"
         ))
     
-    # 8. Check for markdown links
     for i, line in enumerate(lines, 1):
         if is_line_ignored(line, i):
             continue
         
-        # Malformed links
         if '[' in line and ']' in line:
             open_brackets = line.count('[')
             close_brackets = line.count(']')
@@ -439,7 +401,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                     suggestion="Ensure all brackets are properly paired"
                 ))
     
-    # 9. Check for paragraph spacing
     consecutive_blanks = 0
     for i, line in enumerate(lines, 1):
         if not line.strip():
@@ -455,7 +416,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 ))
             consecutive_blanks = 0
     
-    # 10. Check for very long lines (> 1000 characters - potential formatting issue)
     for i, line in enumerate(lines, 1):
         if len(line) > 1000:
             issues.append(Issue(
@@ -466,13 +426,11 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 suggestion="Consider breaking into multiple lines"
             ))
     
-    # 11. Check for inconsistent dialogue quotes
     for i, line in enumerate(lines, 1):
         if is_line_ignored(line, i):
             continue
         
-        # Check for dialogue with straight quotes in otherwise curly quote document
-        if curly_double > straight_double * 2:  # Mostly curly
+        if curly_double > straight_double * 2:
             if '"' in line and re.search(r'\w+\s+"[^"]+"\s+\w+', line):
                 preview = line.strip()[:70]
                 issues.append(Issue(
@@ -484,12 +442,10 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                     suggestion="Consider using curly quotes for consistency"
                 ))
     
-    # 12. Check for common manuscript issues
     for i, line in enumerate(lines, 1):
         if is_line_ignored(line, i):
             continue
         
-        # Check for placeholder text
         if '[INSERT' in line.upper() or '[ADD' in line.upper() or '[EDIT' in line.upper():
             preview = line.strip()[:70]
             issues.append(Issue(
@@ -501,7 +457,6 @@ def verify_manuscript(text: str, ignore_patterns: Optional[List[str]] = None) ->
                 suggestion="Replace with actual content before publishing"
             ))
         
-        # Check for Lorem Ipsum
         if 'lorem ipsum' in line.lower():
             preview = line.strip()[:70]
             issues.append(Issue(
