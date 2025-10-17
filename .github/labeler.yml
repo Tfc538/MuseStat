@@ -1,0 +1,96 @@
+# Auto-labeling configuration for Pull Requests
+
+# Documentation changes
+documentation:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docs/**/*'
+      - 'README.md'
+      - '*.md'
+      - 'musestat/**/*.md'
+
+# Bug fixes
+bug:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'musestat/core/**/*'
+      - 'musestat/features/**/*'
+    - head-branch: ['fix/*', 'bugfix/*', 'hotfix/*']
+
+# New features
+enhancement:
+  - head-branch: ['feature/*', 'feat/*']
+
+# Tests
+tests:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'tests/**/*'
+      - '**/test_*.py'
+      - '**/*_test.py'
+
+# Performance improvements
+performance:
+  - head-branch: ['perf/*', 'performance/*']
+
+# Refactoring
+refactoring:
+  - head-branch: ['refactor/*']
+
+# UI/Display changes
+ui:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'musestat/ui/**/*'
+
+# I/O and file handling
+io:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'musestat/io/**/*'
+
+# Dependencies
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'requirements*.txt'
+      - 'setup.py'
+      - 'pyproject.toml'
+
+# CI/CD
+ci:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/**/*'
+
+# Security
+security:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'SECURITY.md'
+  - head-branch: ['security/*']
+
+# Analysis features
+analysis:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'musestat/features/**/*'
+
+# CLI changes
+cli:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'musestat/cli/**/*'
+      - 'main.py'
+
+# Configuration
+config:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'musestat/config.py'
+      - '*.cfg'
+      - '*.ini'
+      - '*.toml'
+      - '*.yaml'
+      - '*.yml'
+

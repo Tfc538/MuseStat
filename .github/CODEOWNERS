@@ -1,0 +1,38 @@
+# Code Owners for MuseStat
+# These owners will be requested for review when someone opens a pull request.
+
+# Default owner for everything in the repo
+* @Tfc538
+
+# Core functionality
+/musestat/core/ @Tfc538
+
+# Features
+/musestat/features/ @Tfc538
+
+# UI and display
+/musestat/ui/ @Tfc538
+
+# I/O and file handling
+/musestat/io/ @Tfc538
+
+# CLI
+/musestat/cli/ @Tfc538
+
+# Configuration
+/musestat/config.py @Tfc538
+
+# Documentation
+/docs/ @Tfc538
+*.md @Tfc538
+
+# GitHub configuration
+/.github/ @Tfc538
+
+# Dependencies and setup
+requirements*.txt @Tfc538
+setup.py @Tfc538
+
+# Security
+SECURITY.md @Tfc538
+

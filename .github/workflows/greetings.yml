@@ -1,0 +1,74 @@
+name: Greetings
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    
+    steps:
+    - name: Greet new contributors
+      uses: actions/first-interaction@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        issue-message: |
+          👋 Welcome to MuseStat!
+          
+          Thank you for opening your first issue! We're excited to help you with your manuscript analysis needs.
+          
+          **What happens next?**
+          
+          A maintainer will review your issue and respond as soon as possible. In the meantime:
+          
+          - ✅ Check if you've provided all the requested information
+          - 📚 Browse our [documentation](https://github.com/Tfc538/MuseStat/tree/main/docs) for helpful guides
+          - 💬 Join the [discussions](https://github.com/Tfc538/MuseStat/discussions) to connect with the community
+          - ⭐ Consider starring the repository if you find MuseStat useful!
+          
+          **Common Response Times:**
+          - Critical bugs: Within 48 hours
+          - General issues: Within a week
+          - Feature requests: Reviewed regularly
+          
+          We appreciate your contribution to making MuseStat better! 🎉
+          
+        pr-message: |
+          👋 Welcome to MuseStat!
+          
+          Thank you for submitting your first pull request! We're thrilled to have your contribution.
+          
+          **Before we proceed, please ensure:**
+          
+          - ✅ You've read the [Contributing Guidelines](https://github.com/Tfc538/MuseStat/blob/main/CONTRIBUTING.md)
+          - ✅ All tests pass locally
+          - ✅ You've updated documentation if needed
+          - ✅ You've added an entry to CHANGELOG.md
+          - ✅ Your code follows our coding standards (PEP8)
+          - ✅ You've added docstrings and type hints
+          
+          **What happens next?**
+          
+          A maintainer will review your PR and provide feedback. The review process typically includes:
+          
+          1. 🔍 Code review for quality and correctness
+          2. 🧪 Automated tests must pass
+          3. 📝 Documentation review
+          4. 💬 Discussion and potential revisions
+          5. ✅ Approval and merge
+          
+          **Tips for a smooth review:**
+          
+          - Respond to feedback promptly
+          - Keep the PR focused on a single issue or feature
+          - Be open to suggestions and changes
+          - Ask questions if anything is unclear
+          
+          Thank you for contributing to MuseStat! We appreciate your effort and look forward to working with you. 🚀
+

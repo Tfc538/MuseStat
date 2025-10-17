@@ -1,0 +1,111 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - '**.md'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - '**.md'
+  workflow_dispatch:
+
+jobs:
+  check-links:
+    name: Check Documentation Links
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Check links in documentation
+      uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        use-quiet-mode: 'no'
+        use-verbose-mode: 'yes'
+        config-file: '.github/markdown-link-check-config.json'
+        folder-path: 'docs/'
+        file-path: 'README.md'
+      continue-on-error: true
+
+  spell-check:
+    name: Spell Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run spell checker
+      uses: streetsidesoftware/cspell-action@v5
+      with:
+        files: |
+          **/*.md
+          **/*.py
+        incremental_files_only: false
+      continue-on-error: true
+
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run markdownlint
+      uses: DavidAnson/markdownlint-cli2-action@v15
+      with:
+        globs: |
+          **/*.md
+          !**/node_modules/**
+          !**/__pycache__/**
+      continue-on-error: true
+
+  validate-structure:
+    name: Validate Documentation Structure
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Check documentation structure
+      run: |
+        echo "Checking documentation structure..."
+        
+        # Check if main docs exist
+        required_docs=(
+          "docs/INDEX.md"
+          "docs/getting-started.md"
+          "docs/user-guide.md"
+          "docs/features.md"
+          "docs/faq.md"
+          "docs/quick-reference.md"
+          "README.md"
+          "CONTRIBUTING.md"
+          "CODE_OF_CONDUCT.md"
+          "CHANGELOG.md"
+          "SECURITY.md"
+        )
+        
+        missing_docs=()
+        
+        for doc in "${required_docs[@]}"; do
+          if [ ! -f "$doc" ]; then
+            missing_docs+=("$doc")
+          fi
+        done
+        
+        if [ ${#missing_docs[@]} -gt 0 ]; then
+          echo "❌ Missing documentation files:"
+          printf '%s\n' "${missing_docs[@]}"
+          exit 1
+        else
+          echo "✅ All required documentation files present"
+        fi
+

@@ -1,12 +1,20 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
-  - name: 📚 Documentation
+  - name: 📚 Documentation Hub
     url: https://github.com/Tfc538/MuseStat/blob/main/docs/INDEX.md
-    about: Check the documentation for guides and tutorials
-  - name: ❓ FAQ
+    about: Complete documentation index with all guides and tutorials
+  - name: 🚀 Getting Started Guide
+    url: https://github.com/Tfc538/MuseStat/blob/main/docs/getting-started.md
+    about: Quick start guide for new users
+  - name: ❓ Frequently Asked Questions
     url: https://github.com/Tfc538/MuseStat/blob/main/docs/faq.md
-    about: Frequently Asked Questions
+    about: Common questions and troubleshooting tips
   - name: 📖 User Guide
     url: https://github.com/Tfc538/MuseStat/blob/main/docs/user-guide.md
-    about: Complete user guide with examples
-
+    about: Complete user guide with detailed examples
+  - name: 🎯 Quick Reference
+    url: https://github.com/Tfc538/MuseStat/blob/main/docs/quick-reference.md
+    about: Command-line reference and common use cases
+  - name: ✨ Feature Overview
+    url: https://github.com/Tfc538/MuseStat/blob/main/docs/features.md
+    about: Detailed feature documentation

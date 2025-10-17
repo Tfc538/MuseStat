@@ -1,0 +1,100 @@
+{
+  "categories": [
+    {
+      "title": "## 🚀 New Features",
+      "labels": ["feature", "enhancement"]
+    },
+    {
+      "title": "## 🐛 Bug Fixes",
+      "labels": ["bug", "bugfix"]
+    },
+    {
+      "title": "## 📚 Documentation",
+      "labels": ["documentation", "docs"]
+    },
+    {
+      "title": "## 🎨 UI/UX Improvements",
+      "labels": ["ui", "ux", "display"]
+    },
+    {
+      "title": "## ⚡ Performance Improvements",
+      "labels": ["performance", "optimization"]
+    },
+    {
+      "title": "## 🔧 Refactoring",
+      "labels": ["refactoring", "technical-debt"]
+    },
+    {
+      "title": "## 🔒 Security",
+      "labels": ["security"]
+    },
+    {
+      "title": "## 📦 Dependencies",
+      "labels": ["dependencies"]
+    },
+    {
+      "title": "## 🧪 Tests",
+      "labels": ["tests", "testing"]
+    },
+    {
+      "title": "## 🔨 Other Changes",
+      "labels": ["*"]
+    }
+  ],
+  "ignore_labels": [
+    "ignore-for-release",
+    "duplicate",
+    "invalid",
+    "wontfix"
+  ],
+  "sort": "ASC",
+  "template": "${{CHANGELOG}}\n\n**Full Changelog**: ${{FROM_TAG}}...${{TO_TAG}}",
+  "pr_template": "- ${{TITLE}} (#${{NUMBER}}) @${{AUTHOR}}",
+  "empty_template": "- No changes",
+  "label_extractor": [
+    {
+      "pattern": "\\[(.+)\\]",
+      "target": "$1",
+      "on_property": "title"
+    }
+  ],
+  "duplicate_filter": {
+    "pattern": "\\[DUPLICATE\\]",
+    "on_property": "title",
+    "method": "match"
+  },
+  "transformers": [
+    {
+      "pattern": "\\[feature\\]|\\[feat\\]",
+      "target": "feature"
+    },
+    {
+      "pattern": "\\[fix\\]|\\[bugfix\\]",
+      "target": "bug"
+    },
+    {
+      "pattern": "\\[docs\\]|\\[documentation\\]",
+      "target": "documentation"
+    },
+    {
+      "pattern": "\\[perf\\]|\\[performance\\]",
+      "target": "performance"
+    },
+    {
+      "pattern": "\\[refactor\\]",
+      "target": "refactoring"
+    }
+  ],
+  "max_tags_to_fetch": 200,
+  "max_pull_requests": 200,
+  "max_back_track_time_days": 365,
+  "exclude_merge_branches": [],
+  "tag_resolver": {
+    "method": "sort",
+    "filter": {
+      "pattern": "v?\\d+\\.\\d+\\.\\d+",
+      "flags": "gu"
+    }
+  }
+}
+
