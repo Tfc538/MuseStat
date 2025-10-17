@@ -1,0 +1,12 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/Tfc538/MuseStat/blob/main/docs/INDEX.md
+    about: Check the documentation for guides and tutorials
+  - name: ❓ FAQ
+    url: https://github.com/Tfc538/MuseStat/blob/main/docs/faq.md
+    about: Frequently Asked Questions
+  - name: 📖 User Guide
+    url: https://github.com/Tfc538/MuseStat/blob/main/docs/user-guide.md
+    about: Complete user guide with examples
+
