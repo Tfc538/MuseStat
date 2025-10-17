@@ -2,6 +2,7 @@
 Command-line interface for MuseStat.
 """
 
+import sys
 import argparse
 from pathlib import Path
 from datetime import datetime
@@ -45,6 +46,135 @@ from ..ui.tables import (
 )
 
 console = Console()
+
+
+def interactive_mode():
+    """
+    Interactive TUI mode for when executable is run without arguments.
+    Provides a user-friendly interface for first-time users.
+    """
+    console.clear()
+    
+    # Welcome screen
+    welcome = Panel(
+        Text.from_markup(
+            "[bold magenta]📊 Welcome to MuseStat![/bold magenta]\n\n"
+            "[cyan]Manuscript Statistics Analyzer for Fiction Writers[/cyan]\n\n"
+            "This tool provides comprehensive analysis of your manuscript including:\n"
+            "• Word counts and chapter breakdowns\n"
+            "• Reading time estimates\n"
+            "• Readability metrics\n"
+            "• Dialogue and pacing analysis\n"
+            "• Manuscript verification\n\n"
+            "[dim]Press Ctrl+C at any time to exit[/dim]"
+        ),
+        box=box.DOUBLE_EDGE,
+        border_style="bright_magenta",
+        padding=(1, 2)
+    )
+    console.print(welcome)
+    console.print()
+    
+    # List available files
+    files = list_manuscript_files()
+    
+    if not files:
+        console.print("[yellow]No manuscript files found in current directory.[/yellow]")
+        console.print("\n[dim]Supported formats: .md, .txt, .docx, .rtf[/dim]")
+        console.print("\n[bold]Please:[/bold]")
+        console.print("1. Place your manuscript file in this directory, or")
+        console.print("2. Run with: [cyan]musestat -f /path/to/your/manuscript.md[/cyan]")
+        console.print("\nFor more options, run: [cyan]musestat --help[/cyan]")
+        input("\nPress Enter to exit...")
+        return None, {}
+    
+    # Show available files
+    table = Table(title="📚 Available Manuscript Files", box=box.ROUNDED, border_style="cyan")
+    table.add_column("#", style="bold yellow", width=4, justify="right")
+    table.add_column("File Name", style="bold cyan")
+    table.add_column("Type", style="yellow", width=8)
+    table.add_column("Size", style="green", justify="right", width=12)
+    
+    for i, file in enumerate(files, 1):
+        size_kb = file.stat().st_size / 1024
+        size_str = f"{size_kb:.1f} KB" if size_kb < 1024 else f"{size_kb/1024:.1f} MB"
+        table.add_row(
+            str(i),
+            file.name,
+            file.suffix.upper().replace('.', ''),
+            size_str
+        )
+    
+    console.print(table)
+    console.print()
+    
+    # Prompt for file selection
+    while True:
+        try:
+            choice = console.input("[bold cyan]Select a file number (or press Enter for #1):[/bold cyan] ").strip()
+            
+            if choice == "":
+                choice = "1"
+            
+            file_index = int(choice) - 1
+            
+            if 0 <= file_index < len(files):
+                selected_file = str(files[file_index])
+                break
+            else:
+                console.print(f"[red]Please enter a number between 1 and {len(files)}[/red]")
+        except ValueError:
+            console.print("[red]Please enter a valid number[/red]")
+        except KeyboardInterrupt:
+            console.print("\n[yellow]Cancelled.[/yellow]")
+            return None, {}
+    
+    console.print(f"\n[green]✓ Selected:[/green] [bold]{selected_file}[/bold]")
+    console.print()
+    
+    # Analysis options menu
+    options_panel = Panel(
+        "[bold]Analysis Options:[/bold]\n\n"
+        "[cyan]1.[/cyan] Quick Summary (compact view)\n"
+        "[cyan]2.[/cyan] Standard Analysis (recommended)\n"
+        "[cyan]3.[/cyan] Full Analysis (with chapters and word frequency)\n"
+        "[cyan]4.[/cyan] Advanced Analysis (readability, dialogue, pacing)\n"
+        "[cyan]5.[/cyan] Verify Manuscript (check for issues before publishing)",
+        title="📊 Choose Analysis Type",
+        border_style="cyan",
+        box=box.ROUNDED
+    )
+    console.print(options_panel)
+    console.print()
+    
+    # Prompt for analysis type
+    while True:
+        try:
+            analysis_choice = console.input("[bold cyan]Select analysis type (or press Enter for #2):[/bold cyan] ").strip()
+            
+            if analysis_choice == "":
+                analysis_choice = "2"
+            
+            if analysis_choice in ["1", "2", "3", "4", "5"]:
+                break
+            else:
+                console.print("[red]Please enter a number between 1 and 5[/red]")
+        except KeyboardInterrupt:
+            console.print("\n[yellow]Cancelled.[/yellow]")
+            return None, {}
+    
+    console.print()
+    
+    # Map choice to options
+    options = {
+        'compact': analysis_choice == "1",
+        'semi_compact': analysis_choice == "2",
+        'full': analysis_choice == "3",
+        'advanced': analysis_choice == "4",
+        'verify': analysis_choice == "5"
+    }
+    
+    return selected_file, options
 
 
 def main():
@@ -163,6 +293,33 @@ def main():
     
     args = parser.parse_args()
     
+    # Check if running in interactive mode (no file specified and no special flags)
+    is_interactive = (
+        not args.file and
+        not args.list and
+        not args.formats and
+        not args.verify and
+        len(sys.argv) == 1  # No arguments at all
+    )
+    
+    if is_interactive:
+        selected_file, options = interactive_mode()
+        
+        if not selected_file:
+            return  # User cancelled or no files found
+        
+        # Set args based on interactive choices
+        args.file = selected_file
+        if options.get('verify'):
+            args.verify = True
+        elif options.get('compact'):
+            args.compact = True
+        elif options.get('semi_compact'):
+            args.semi_compact = True
+        elif options.get('advanced'):
+            args.advanced = True
+        # else: full mode (default)
+    
     # Handle special commands
     if args.formats:
         console.print(Panel(
@@ -202,12 +359,16 @@ def main():
         console.print("\n[dim]Use -f <filename> to analyze a specific file[/dim]")
         return
     
-    # Determine file path
-    file_path = args.file if args.file else "manuscript.md"
+    # Determine file path (interactive mode already sets args.file)
+    file_path = args.file
+    
+    if not file_path:
+        # If still no file (shouldn't happen after interactive mode)
+        file_path = "manuscript.md"
     
     if not Path(file_path).exists():
         console.print(f"[bold red]Error:[/bold red] File '{file_path}' not found!")
-        console.print("\n[dim]Tip: Use --list to see available files[/dim]")
+        console.print("\n[dim]Tip: Use --list to see available files or run without arguments for interactive mode[/dim]")
         return
     
     # Load comparison stats if requested
@@ -403,6 +564,15 @@ def main():
                 console.print(create_word_frequency_table(stats['common_words']))
         else:
             display_statistics(stats, compact=args.compact, semi_compact=args.semi_compact, comparison_stats=comparison_stats, show_advanced=args.advanced)
+    
+    # If in interactive mode, wait for user before exiting
+    if is_interactive:
+        console.print()
+        console.print("[dim italic]Analysis complete. Press Enter to exit...[/dim italic]")
+        try:
+            input()
+        except (KeyboardInterrupt, EOFError):
+            pass
 
 
 if __name__ == "__main__":
