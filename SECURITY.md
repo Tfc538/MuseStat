@@ -75,7 +75,7 @@ We regularly monitor these dependencies for known vulnerabilities.
 
 ## Best Practices for Users
 
-- **Keep Updated**: Always use the latest version (currently v1.2.0)
+- **Keep Updated**: Always use the latest version (currently v1.2.1)
 - **Verify Downloads**: Download executables only from [official GitHub releases](https://github.com/Tfc538/MuseStat/releases)
 - **Check Hashes**: Verify file integrity (when provided)
 - **Source Installation**: If building from source, use the official repository
@@ -96,7 +96,7 @@ We regularly monitor these dependencies for known vulnerabilities.
 For a complete history of all releases and changes, including security updates, see:
 - [CHANGELOG.md](CHANGELOG.md) - Detailed version history
 - [GitHub Releases](https://github.com/Tfc538/MuseStat/releases) - Download and release notes
-- Current stable version: **v1.2.0** (Released: 2025-10-17)
+- Current stable version: **v1.2.1** (Released: 2025-10-17)
 
 ## Acknowledgments
 

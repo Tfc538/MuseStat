@@ -5,6 +5,20 @@ All notable changes to MuseStat will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2025-10-17
+
+### Fixed
+- **Version Update Notifications**: Fixed critical bug where update notifications were never displayed to users
+  - The version check infrastructure existed but was never called in the CLI
+  - Now displays beautiful panel notification when updates are available
+  - Non-blocking, silent check with 24-hour caching
+  - Shows current version, latest version, and download link
+
+### Changed
+- Updated all documentation references from v1.2.0 to v1.2.1
+- Enhanced SECURITY.md with improved disclosure policy and version history section
+- Improved cross-references between documentation files in CONTRIBUTING.md
+
 ## [1.2.0] - 2025-10-17
 
 ### Added
@@ -184,6 +198,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Genre-specific benchmarks
 - Time-of-day analysis for writing patterns
 
+[1.2.1]: https://github.com/Tfc538/MuseStat/releases/tag/v1.2.1
 [1.2.0]: https://github.com/Tfc538/MuseStat/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Tfc538/MuseStat/releases/tag/v1.1.0
 [1.0.2]: https://github.com/Tfc538/MuseStat/releases/tag/v1.0.2

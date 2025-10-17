@@ -20,7 +20,7 @@ When creating a bug report, include:
 - **Environment**: 
   - OS (Windows/Linux/macOS)
   - Python version (if running from source)
-  - MuseStat version (current: v1.2.0)
+  - MuseStat version (current: v1.2.1)
 - **Manuscript Details** (if relevant):
   - File format (.md, .txt, .docx, .rtf)
   - Approximate size
@@ -163,7 +163,7 @@ By contributing, you agree that your contributions will be licensed under the sa
 ## Related Documentation
 
 - [README.md](README.md) - Project overview and usage
-- [CHANGELOG.md](CHANGELOG.md) - Version history (current: v1.2.0)
+- [CHANGELOG.md](CHANGELOG.md) - Version history (current: v1.2.1)
 - [SECURITY.md](SECURITY.md) - Security policy and vulnerability reporting
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) - Community standards
 - [ROADMAP.md](ROADMAP.md) - Future feature plans

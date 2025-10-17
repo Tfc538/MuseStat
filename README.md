@@ -2,7 +2,7 @@
 
 Beautiful terminal UI for comprehensive manuscript analysis with advanced features for fiction writers.
 
-![Version](https://img.shields.io/badge/version-1.2.0-blue)
+![Version](https://img.shields.io/badge/version-1.2.1-blue)
 ![Python](https://img.shields.io/badge/python-3.7+-green)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
