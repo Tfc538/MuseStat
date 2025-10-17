@@ -191,7 +191,7 @@ python musestat.py -v
 
 ## ✨ Version
 
-**MuseStat v2.1** - Complete manuscript analysis & verification toolkit
+**MuseStat v1.2.0** - Complete manuscript analysis & verification toolkit
 
 Last updated: October 2025
 

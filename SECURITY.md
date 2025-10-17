@@ -6,7 +6,9 @@ We currently support the following versions with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
+| 1.2.x   | :white_check_mark: |
+| 1.1.x   | :white_check_mark: |
+| 1.0.x   | :x:                |
 | < 1.0   | :x:                |
 
 ## Reporting a Vulnerability
@@ -73,21 +75,35 @@ We regularly monitor these dependencies for known vulnerabilities.
 
 ## Best Practices for Users
 
-- **Keep Updated**: Always use the latest version
-- **Verify Downloads**: Download executables only from official GitHub releases
+- **Keep Updated**: Always use the latest version (currently v1.2.0)
+- **Verify Downloads**: Download executables only from [official GitHub releases](https://github.com/Tfc538/MuseStat/releases)
 - **Check Hashes**: Verify file integrity (when provided)
-- **Source Installation**: If building from source, use official repository
+- **Source Installation**: If building from source, use the official repository
+- **Virtual Environment**: When installing from source, use a virtual environment to isolate dependencies
 
 ## Disclosure Policy
 
 - Security vulnerabilities will be disclosed after a fix is available
-- Critical vulnerabilities will be disclosed with security advisories
-- Users will be notified through GitHub releases
-- CHANGELOG will document security fixes
+- Critical vulnerabilities will be disclosed with GitHub Security Advisories
+- Users will be notified through:
+  - GitHub releases with security tags
+  - [CHANGELOG.md](CHANGELOG.md) with detailed security fix documentation
+  - GitHub Security tab announcements
+- Security patches will be released as soon as verified fixes are available
+
+## Version History
+
+For a complete history of all releases and changes, including security updates, see:
+- [CHANGELOG.md](CHANGELOG.md) - Detailed version history
+- [GitHub Releases](https://github.com/Tfc538/MuseStat/releases) - Download and release notes
+- Current stable version: **v1.2.0** (Released: 2025-10-17)
 
 ## Acknowledgments
 
-We appreciate the security research community's efforts to responsibly disclose vulnerabilities.
+We appreciate the security research community's efforts to responsibly disclose vulnerabilities. Contributors who report security issues will be acknowledged in:
+- Security advisories (unless you prefer to remain anonymous)
+- CHANGELOG.md under the relevant version
+- GitHub release notes
 
 ---
 

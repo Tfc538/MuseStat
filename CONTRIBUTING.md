@@ -20,7 +20,7 @@ When creating a bug report, include:
 - **Environment**: 
   - OS (Windows/Linux/macOS)
   - Python version (if running from source)
-  - MuseStat version
+  - MuseStat version (current: v1.2.0)
 - **Manuscript Details** (if relevant):
   - File format (.md, .txt, .docx, .rtf)
   - Approximate size
@@ -149,14 +149,25 @@ perf: Optimize chapter detection for large manuscripts
 ## Questions?
 
 Feel free to:
-- Open an issue for questions
+- Open an [issue](https://github.com/Tfc538/MuseStat/issues) for questions
 - Email: [post@tim-gatzke.de](mailto:post@tim-gatzke.de)
 - Check the [FAQ](docs/faq.md)
 - Visit: [tim-gatzke.de](https://tim-gatzke.de)
+- Review [CHANGELOG.md](CHANGELOG.md) for version history
+- Check [SECURITY.md](SECURITY.md) for security-related questions
 
 ## License
 
 By contributing, you agree that your contributions will be licensed under the same [MIT License](LICENSE) that covers the project.
+
+## Related Documentation
+
+- [README.md](README.md) - Project overview and usage
+- [CHANGELOG.md](CHANGELOG.md) - Version history (current: v1.2.0)
+- [SECURITY.md](SECURITY.md) - Security policy and vulnerability reporting
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) - Community standards
+- [ROADMAP.md](ROADMAP.md) - Future feature plans
+- [docs/](docs/) - Detailed documentation
 
 ---
 

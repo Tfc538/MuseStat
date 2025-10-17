@@ -31,7 +31,7 @@ Complete documentation index with descriptions.
 ### Features & Capabilities
 - **[Features](features.md)** (600+ lines)
   - Complete feature list
-  - What's new in v2.1
+  - What's new in v1.2.0
   - Integration guides
   - Use cases and workflows
 
@@ -140,7 +140,7 @@ All documentation is:
 
 ## 🔄 Documentation Updates
 
-**Version**: v2.1  
+**Version**: v1.2.0  
 **Last Updated**: October 2025  
 **Status**: Complete
 
