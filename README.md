@@ -2,7 +2,7 @@
 
 Beautiful terminal UI for comprehensive manuscript analysis with advanced features for fiction writers.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.0.1-blue)
 ![Python](https://img.shields.io/badge/python-3.7+-green)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -43,7 +43,13 @@ Download the latest executable for your platform from the [Releases](https://git
 - **Linux**: `musestat-linux-x64`
 - **macOS**: `musestat-macos-x64`
 
-No Python installation required!
+**No Python installation required!**
+
+✨ **Interactive Mode**: Simply double-click the executable to launch an interactive menu that guides you through:
+- File selection
+- Analysis type selection
+- Beautiful results display
+- Perfect for first-time users!
 
 ### From Source
 
@@ -87,7 +93,25 @@ pyinstaller --onefile --name musestat --console main.py
 
 ## 📖 Usage
 
-### Basic Usage
+### Interactive Mode (Easiest!)
+
+Simply double-click the executable or run without arguments:
+
+```bash
+# Windows
+musestat.exe
+
+# Linux/macOS
+./musestat
+```
+
+You'll see a beautiful welcome screen with:
+1. List of all manuscript files in the current directory
+2. File selection menu
+3. Analysis type menu (quick, standard, full, advanced, verify)
+4. Results that stay on screen until you press Enter
+
+### Command-Line Mode (For Power Users)
 
 ```bash
 # Analyze default file
