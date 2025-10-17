@@ -11,7 +11,7 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -51,7 +51,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -91,7 +91,7 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -132,7 +132,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-windows, build-linux, build-macos]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       
