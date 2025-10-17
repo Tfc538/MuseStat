@@ -4,6 +4,9 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: write
+
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -26,14 +29,9 @@ jobs:
           pyinstaller --onefile --name musestat --console main.py
       
       - name: Upload Windows executable
-        uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./dist/musestat.exe
-          asset_name: musestat-windows-x64.exe
-          asset_content_type: application/octet-stream
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload ${{ github.event.release.tag_name }} ./dist/musestat.exe --clobber
 
   build-linux:
     runs-on: ubuntu-latest
@@ -56,14 +54,9 @@ jobs:
           pyinstaller --onefile --name musestat --console main.py
       
       - name: Upload Linux executable
-        uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./dist/musestat
-          asset_name: musestat-linux-x64
-          asset_content_type: application/octet-stream
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload ${{ github.event.release.tag_name }} ./dist/musestat --clobber
 
   build-macos:
     runs-on: macos-latest
@@ -86,14 +79,9 @@ jobs:
           pyinstaller --onefile --name musestat --console main.py
       
       - name: Upload macOS executable
-        uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./dist/musestat
-          asset_name: musestat-macos-x64
-          asset_content_type: application/octet-stream
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload ${{ github.event.release.tag_name }} ./dist/musestat --clobber
 
   update-version:
     runs-on: ubuntu-latest
