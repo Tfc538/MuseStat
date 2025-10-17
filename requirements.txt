@@ -1,5 +1,6 @@
 # Core dependencies (required)
 rich>=13.0.0
+questionary>=2.0.0   # For interactive TUI with arrow key navigation
 
 # File format support (optional)
 python-docx>=0.8.11  # For Word Document (.docx) support

@@ -27,7 +27,7 @@ pip install python-docx
 pip install striprtf
 
 # For advanced features (readability, language detection)
-pip install langdetect textstat
+pip install langdetect textstat questionary
 ```
 
 **Or install everything at once:**
@@ -351,7 +351,7 @@ Week 4: Setup progress tracking
 - [ ] `rich` library installed (`pip install rich`)
 - [ ] Optional: `python-docx` for .docx files
 - [ ] Optional: `striprtf` for .rtf files
-- [ ] Optional: `langdetect textstat` for advanced features
+- [ ] Optional: `langdetect textstat questionary` for advanced features
 - [ ] Ran first analysis: `python musestat.py`
 - [ ] Tried semi-compact mode: `python musestat.py -sc`
 - [ ] Located your manuscript file

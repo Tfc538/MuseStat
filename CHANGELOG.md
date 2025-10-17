@@ -5,6 +5,32 @@ All notable changes to MuseStat will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-10-17
+
+### Added
+- **Arrow key navigation** in interactive mode using questionary library
+- Visual selection highlighting with custom styling
+- Better keyboard navigation (↑↓ arrows + Enter to select)
+- Graceful fallback to number input if questionary not available
+- Project governance files:
+  - CODE_OF_CONDUCT.md (Contributor Covenant v2.0)
+  - CONTRIBUTING.md (development guidelines)
+  - SECURITY.md (vulnerability reporting process)
+  - GitHub issue templates (bug report, feature request, question)
+  - Pull request template with comprehensive testing checklist
+  - Issue template config with documentation links
+
+### Improved
+- Much more intuitive interactive TUI experience
+- File selection with arrow keys instead of typing numbers
+- Analysis type selection with visual highlighting
+- Better first-time user onboarding
+
+### Changed
+- Contact information updated throughout project files
+- Author details: Tim Gatzke <post@tim-gatzke.de>
+- Website: tim-gatzke.de
+
 ## [1.0.2] - 2025-10-17
 
 ### Fixed

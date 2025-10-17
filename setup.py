@@ -17,11 +17,18 @@ with open("README.md", 'r', encoding='utf-8') as f:
 setup(
     name="musestat",
     version=version,
-    author="Tim Gatzke <post@tim-gatzke.de>",
+    author="Tim Gatzke",
+    author_email="post@tim-gatzke.de",
     description="Manuscript Statistics Analyzer with Advanced Features for Fiction Writers",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Tfc538/MuseStat",
+    project_urls={
+        "Homepage": "https://tim-gatzke.de",
+        "Bug Reports": "https://github.com/Tfc538/MuseStat/issues",
+        "Documentation": "https://github.com/Tfc538/MuseStat/blob/main/docs/INDEX.md",
+        "Source": "https://github.com/Tfc538/MuseStat",
+    },
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -38,6 +45,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "rich>=13.0.0",
+        "questionary>=2.0.0",
         "python-docx>=0.8.11",
         "striprtf>=0.0.26",
         "langdetect>=1.0.9",

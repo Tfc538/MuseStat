@@ -2,8 +2,10 @@
 Configuration constants for MuseStat.
 """
 
-__version__ = "1.0.2"
-__author__ = "Tim Gatzke <post@tim-gatzke.de>"
+__version__ = "1.1.0"
+__author__ = "Tim Gatzke"
+__email__ = "post@tim-gatzke.de"
+__website__ = "https://tim-gatzke.de"
 __description__ = "Manuscript Statistics Analyzer with Advanced Features"
 
 # GitHub repository information

@@ -14,6 +14,13 @@ from rich.columns import Columns
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich import box
 
+try:
+    import questionary
+    from questionary import Style
+    QUESTIONARY_AVAILABLE = True
+except ImportError:
+    QUESTIONARY_AVAILABLE = False
+
 from ..config import __version__
 from ..core.analyzer import analyze_manuscript
 from ..io.readers import read_manuscript, get_supported_formats_info
@@ -56,6 +63,8 @@ def interactive_mode():
     console.clear()
     
     # Welcome screen
+    navigation_hint = "Use ↑↓ arrow keys to navigate, Enter to select" if QUESTIONARY_AVAILABLE else "Type numbers to select options"
+    
     welcome = Panel(
         Text.from_markup(
             "[bold magenta]📊 Welcome to MuseStat![/bold magenta]\n\n"
@@ -66,6 +75,7 @@ def interactive_mode():
             "• Readability metrics\n"
             "• Dialogue and pacing analysis\n"
             "• Manuscript verification\n\n"
+            f"[dim]{navigation_hint}[/dim]\n"
             "[dim]Press Ctrl+C at any time to exit[/dim]"
         ),
         box=box.DOUBLE_EDGE,
@@ -109,59 +119,126 @@ def interactive_mode():
     console.print()
     
     # Prompt for file selection
-    while True:
+    if QUESTIONARY_AVAILABLE:
+        # Use arrow keys for navigation
+        custom_style = Style([
+            ('qmark', 'fg:#673ab7 bold'),
+            ('question', 'bold'),
+            ('answer', 'fg:#00ff00 bold'),
+            ('pointer', 'fg:#673ab7 bold'),
+            ('highlighted', 'fg:#673ab7 bold'),
+            ('selected', 'fg:#00ff00'),
+        ])
+        
+        file_choices = [
+            {
+                'name': f"{i}. {file.name} ({file.suffix.upper().replace('.', '')}, "
+                        f"{file.stat().st_size/1024:.1f} KB)" 
+                        if file.stat().st_size < 1024*1024 
+                        else f"{i}. {file.name} ({file.suffix.upper().replace('.', '')}, "
+                             f"{file.stat().st_size/1024/1024:.1f} MB)",
+                'value': str(file)
+            }
+            for i, file in enumerate(files, 1)
+        ]
+        
         try:
-            choice = console.input("[bold cyan]Select a file number (or press Enter for #1):[/bold cyan] ").strip()
+            selected_file = questionary.select(
+                "Select a manuscript file (use arrow keys):",
+                choices=file_choices,
+                style=custom_style,
+                use_indicator=True,
+                use_shortcuts=True
+            ).ask()
             
-            if choice == "":
-                choice = "1"
-            
-            file_index = int(choice) - 1
-            
-            if 0 <= file_index < len(files):
-                selected_file = str(files[file_index])
-                break
-            else:
-                console.print(f"[red]Please enter a number between 1 and {len(files)}[/red]")
-        except ValueError:
-            console.print("[red]Please enter a valid number[/red]")
+            if not selected_file:
+                console.print("\n[yellow]Cancelled.[/yellow]")
+                return None, {}
         except KeyboardInterrupt:
             console.print("\n[yellow]Cancelled.[/yellow]")
             return None, {}
+    else:
+        # Fallback to number input
+        while True:
+            try:
+                choice = console.input("[bold cyan]Select a file number (or press Enter for #1):[/bold cyan] ").strip()
+                
+                if choice == "":
+                    choice = "1"
+                
+                file_index = int(choice) - 1
+                
+                if 0 <= file_index < len(files):
+                    selected_file = str(files[file_index])
+                    break
+                else:
+                    console.print(f"[red]Please enter a number between 1 and {len(files)}[/red]")
+            except ValueError:
+                console.print("[red]Please enter a valid number[/red]")
+            except KeyboardInterrupt:
+                console.print("\n[yellow]Cancelled.[/yellow]")
+                return None, {}
     
-    console.print(f"\n[green]✓ Selected:[/green] [bold]{selected_file}[/bold]")
+    console.print(f"\n[green]✓ Selected:[/green] [bold]{Path(selected_file).name}[/bold]")
     console.print()
     
     # Analysis options menu
-    options_panel = Panel(
-        "[bold]Analysis Options:[/bold]\n\n"
-        "[cyan]1.[/cyan] Quick Summary (compact view)\n"
-        "[cyan]2.[/cyan] Standard Analysis (recommended)\n"
-        "[cyan]3.[/cyan] Full Analysis (with chapters and word frequency)\n"
-        "[cyan]4.[/cyan] Advanced Analysis (readability, dialogue, pacing)\n"
-        "[cyan]5.[/cyan] Verify Manuscript (check for issues before publishing)",
-        title="📊 Choose Analysis Type",
-        border_style="cyan",
-        box=box.ROUNDED
-    )
-    console.print(options_panel)
-    console.print()
-    
-    # Prompt for analysis type
-    while True:
+    if QUESTIONARY_AVAILABLE:
+        # Use arrow keys for navigation
+        analysis_choices = [
+            questionary.Choice("Quick Summary (compact view)", value="1"),
+            questionary.Choice("Standard Analysis (recommended)", value="2"),
+            questionary.Choice("Full Analysis (with chapters and word frequency)", value="3"),
+            questionary.Choice("Advanced Analysis (readability, dialogue, pacing)", value="4"),
+            questionary.Choice("Verify Manuscript (check for publishing)", value="5"),
+        ]
+        
         try:
-            analysis_choice = console.input("[bold cyan]Select analysis type (or press Enter for #2):[/bold cyan] ").strip()
+            analysis_choice = questionary.select(
+                "Choose analysis type (use arrow keys):",
+                choices=analysis_choices,
+                default="2",
+                style=custom_style,
+                use_indicator=True
+            ).ask()
             
-            if analysis_choice == "":
-                analysis_choice = "2"
-            
-            if analysis_choice in ["1", "2", "3", "4", "5"]:
-                break
-            else:
-                console.print("[red]Please enter a number between 1 and 5[/red]")
+            if not analysis_choice:
+                console.print("\n[yellow]Cancelled.[/yellow]")
+                return None, {}
         except KeyboardInterrupt:
             console.print("\n[yellow]Cancelled.[/yellow]")
             return None, {}
+    else:
+        # Fallback to number input
+        options_panel = Panel(
+            "[bold]Analysis Options:[/bold]\n\n"
+            "[cyan]1.[/cyan] Quick Summary (compact view)\n"
+            "[cyan]2.[/cyan] Standard Analysis (recommended)\n"
+            "[cyan]3.[/cyan] Full Analysis (with chapters and word frequency)\n"
+            "[cyan]4.[/cyan] Advanced Analysis (readability, dialogue, pacing)\n"
+            "[cyan]5.[/cyan] Verify Manuscript (check for issues before publishing)",
+            title="📊 Choose Analysis Type",
+            border_style="cyan",
+            box=box.ROUNDED
+        )
+        console.print(options_panel)
+        console.print()
+        
+        # Prompt for analysis type
+        while True:
+            try:
+                analysis_choice = console.input("[bold cyan]Select analysis type (or press Enter for #2):[/bold cyan] ").strip()
+                
+                if analysis_choice == "":
+                    analysis_choice = "2"
+                
+                if analysis_choice in ["1", "2", "3", "4", "5"]:
+                    break
+                else:
+                    console.print("[red]Please enter a number between 1 and 5[/red]")
+            except KeyboardInterrupt:
+                console.print("\n[yellow]Cancelled.[/yellow]")
+                return None, {}
     
     console.print()
     
@@ -197,7 +274,7 @@ def main():
                "\n"
                "Display Modes: full, -sc (semi-compact), -c (compact), -m (minimalist), -v (verify)\n"
                "Supported formats: .md, .txt, .docx, .rtf\n"
-               "Advanced features require: langdetect, textstat\n"
+               "Advanced features require: langdetect, textstat questionary\n"
                "Export formats: json, csv, html"
     )
     

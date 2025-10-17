@@ -15,7 +15,7 @@ pip install rich
 
 Optional dependencies for additional formats:
 ```bash
-pip install python-docx striprtf langdetect textstat
+pip install python-docx striprtf langdetect textstat questionary
 ```
 
 ---
@@ -25,7 +25,7 @@ pip install python-docx striprtf langdetect textstat
 **A:** Yes! MuseStat works with `.md` and `.txt` files using only `rich`. Install optional packages only if you need:
 - `.docx` support → `python-docx`
 - `.rtf` support → `striprtf`
-- Advanced features → `langdetect textstat`
+- Advanced features → `langdetect textstat questionary`
 
 ---
 

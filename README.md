@@ -2,7 +2,7 @@
 
 Beautiful terminal UI for comprehensive manuscript analysis with advanced features for fiction writers.
 
-![Version](https://img.shields.io/badge/version-1.0.2-blue)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![Python](https://img.shields.io/badge/python-3.7+-green)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -357,6 +357,7 @@ python main.py -f final.docx -c
 ### Advanced Features (Optional)
 - **langdetect** >= 1.0.9 - Language detection
 - **textstat** >= 0.7.3 - Readability metrics
+- **questionary** >= 2.0.0 - Interactive TUI
 
 *Note: The tool works without optional dependencies but with reduced functionality.*
 
@@ -406,6 +407,15 @@ python main.py -f final.docx -c
 ## 🤝 Contributing
 
 Suggestions and contributions are welcome! This tool is designed for writers, by writers.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## 💬 Contact
+
+- **Author**: Tim Gatzke
+- **Email**: [post@tim-gatzke.de](mailto:post@tim-gatzke.de)
+- **Website**: [tim-gatzke.de](https://tim-gatzke.de)
+- **GitHub**: [@Tfc538](https://github.com/Tfc538)
 
 ## 📄 License
 

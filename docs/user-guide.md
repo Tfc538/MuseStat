@@ -57,7 +57,7 @@ pip install python-docx
 pip install striprtf
 
 # For advanced features
-pip install langdetect textstat
+pip install langdetect textstat questionary
 ```
 
 ---

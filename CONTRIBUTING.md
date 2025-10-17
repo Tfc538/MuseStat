@@ -150,8 +150,9 @@ perf: Optimize chapter detection for large manuscripts
 
 Feel free to:
 - Open an issue for questions
-- Start a discussion in GitHub Discussions (if enabled)
+- Email: [post@tim-gatzke.de](mailto:post@tim-gatzke.de)
 - Check the [FAQ](docs/faq.md)
+- Visit: [tim-gatzke.de](https://tim-gatzke.de)
 
 ## License
 

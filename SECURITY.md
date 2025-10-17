@@ -19,7 +19,7 @@ We take the security of MuseStat seriously. If you discover a security vulnerabi
 
 Instead, please report them via one of the following methods:
 
-1. **Email**: Send details to [INSERT YOUR EMAIL]
+1. **Email**: Send details to [post@tim-gatzke.de](mailto:post@tim-gatzke.de)
 2. **GitHub Security Advisory**: Use the [Security tab](https://github.com/Tfc538/MuseStat/security/advisories) to privately report vulnerabilities
 
 ### What to Include
@@ -67,6 +67,7 @@ MuseStat relies on several third-party packages:
 - `langdetect` - Language detection
 - `textstat` - Readability metrics
 - `requests` - Version checking
+- `questionary` - Interactive TUI
 
 We regularly monitor these dependencies for known vulnerabilities.
 
