@@ -5,6 +5,20 @@ All notable changes to MuseStat will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Interactive TUI mode when executable is run without arguments
+- Welcome screen with feature overview
+- Automatic file discovery and selection menu
+- Analysis type selection menu (quick, standard, full, advanced, verify)
+- "Press Enter to exit" prompt to prevent executable window from closing immediately
+- Improved first-time user experience
+
+### Changed
+- Executables now user-friendly for non-technical users
+- No longer immediately closes when double-clicked
+
 ## [1.0.0] - 2025-10-17
 
 ### Added
