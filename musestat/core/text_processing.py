@@ -97,7 +97,7 @@ def count_paragraphs(text: str) -> int:
     return len([p for p in paragraphs if p.strip()])
 
 
-def get_most_common_words(text: str, n: int = 20, stop_words: set = None) -> List[Tuple[str, int]]:
+def get_most_common_words(text: str, n: int = 20, stop_words: set = None, min_length: int = 3) -> List[Tuple[str, int]]:
     """
     Get the most common words (excluding stop words).
     
@@ -105,6 +105,7 @@ def get_most_common_words(text: str, n: int = 20, stop_words: set = None) -> Lis
         text: Text to analyze
         n: Number of top words to return
         stop_words: Set of words to exclude (if None, uses empty set)
+        min_length: Minimum word length to include (default: 3)
         
     Returns:
         List of (word, count) tuples for the most common words
@@ -114,7 +115,7 @@ def get_most_common_words(text: str, n: int = 20, stop_words: set = None) -> Lis
     
     clean_text = clean_markdown(text).lower()
     words = re.findall(r'\b\w+\b', clean_text)
-    words = [w for w in words if w not in stop_words and len(w) > 2]
+    words = [w for w in words if w not in stop_words and len(w) >= min_length]
     
     return Counter(words).most_common(n)
 

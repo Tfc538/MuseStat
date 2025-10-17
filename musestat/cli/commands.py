@@ -272,6 +272,13 @@ def main():
                "  %(prog)s --save-snapshot                 # Save stats for later comparison\n"
                "  %(prog)s --list                          # List available files\n"
                "\n"
+               "Display Customization:\n"
+               "  %(prog)s --top-words 25                  # Show 25 most frequent words\n"
+               "  %(prog)s --max-chapters 10               # Display only first 10 chapters\n"
+               "  %(prog)s --sparkline-width 60            # Wider sparkline charts\n"
+               "  %(prog)s --hide-word-frequency           # Hide word frequency table\n"
+               "  %(prog)s --show-top-chapters 5           # Show 5 longest chapters\n"
+               "\n"
                "Display Modes: full, -sc (semi-compact), -c (compact), -m (minimalist), -v (verify)\n"
                "Supported formats: .md, .txt, .docx, .rtf\n"
                "Advanced features require: langdetect, textstat questionary\n"
@@ -368,6 +375,65 @@ def main():
         version=f'%(prog)s {__version__}'
     )
     
+    # Display customization options
+    display_group = parser.add_argument_group('Display Customization')
+    
+    display_group.add_argument(
+        '--top-words',
+        type=int,
+        metavar='N',
+        default=15,
+        help='Number of most frequent words to display (default: 15)'
+    )
+    
+    display_group.add_argument(
+        '--max-chapters',
+        type=int,
+        metavar='N',
+        help='Maximum number of chapters to display in detail (default: all)'
+    )
+    
+    display_group.add_argument(
+        '--min-word-length',
+        type=int,
+        metavar='N',
+        default=1,
+        help='Minimum word length for frequency analysis (default: 3)'
+    )
+    
+    display_group.add_argument(
+        '--sparkline-width',
+        type=int,
+        metavar='N',
+        default=40,
+        help='Width of sparkline charts in characters (default: 40)'
+    )
+    
+    display_group.add_argument(
+        '--hide-word-frequency',
+        action='store_true',
+        help='Hide the word frequency table'
+    )
+    
+    display_group.add_argument(
+        '--hide-heat-map',
+        action='store_true',
+        help='Hide the density heat map visualization'
+    )
+    
+    display_group.add_argument(
+        '--hide-chapter-details',
+        action='store_true',
+        help='Hide individual chapter breakdown table'
+    )
+    
+    display_group.add_argument(
+        '--show-top-chapters',
+        type=int,
+        metavar='N',
+        help='Show top N longest chapters in a summary table'
+    )
+    
     args = parser.parse_args()
     
     # Check if running in interactive mode (no file specified and no special flags)
@@ -455,7 +521,13 @@ def main():
     
     # Analyze manuscript (with progress bar unless minimalist or output to file)
     show_progress = not (args.minimalist or args.output or args.no_animation)
-    stats = analyze_manuscript(file_path, enable_advanced=args.advanced, show_progress=show_progress)
+    stats = analyze_manuscript(
+        file_path, 
+        enable_advanced=args.advanced, 
+        show_progress=show_progress,
+        top_words_count=max(args.top_words, 1),  # Ensure at least 1
+        min_word_length=max(args.min_word_length, 1)  # Ensure at least 1
+    )
     
     if not stats:
         console.print("[bold red]Failed to analyze manuscript.[/bold red]")
@@ -564,7 +636,11 @@ def main():
     if args.chapters_only:
         console.clear()
         if stats['chapters']:
-            console.print(create_chapters_table(stats['chapters']))
+            console.print(create_chapters_table(
+                stats['chapters'], 
+                max_chapters=args.max_chapters,
+                sparkline_width=args.sparkline_width
+            ))
         else:
             console.print("[yellow]No chapters found in manuscript.[/yellow]")
     else:
@@ -640,7 +716,25 @@ def main():
                     console.print()
                 console.print(create_word_frequency_table(stats['common_words']))
         else:
-            display_statistics(stats, compact=args.compact, semi_compact=args.semi_compact, comparison_stats=comparison_stats, show_advanced=args.advanced)
+            # Build display options dictionary
+            display_options = {
+                'top_words': args.top_words,
+                'max_chapters': args.max_chapters,
+                'sparkline_width': args.sparkline_width,
+                'hide_word_frequency': args.hide_word_frequency,
+                'hide_heat_map': args.hide_heat_map,
+                'hide_chapter_details': args.hide_chapter_details,
+                'show_top_chapters': args.show_top_chapters
+            }
+            
+            display_statistics(
+                stats, 
+                compact=args.compact, 
+                semi_compact=args.semi_compact, 
+                comparison_stats=comparison_stats, 
+                show_advanced=args.advanced,
+                display_options=display_options
+            )
     
     # If in interactive mode, wait for user before exiting
     if is_interactive:

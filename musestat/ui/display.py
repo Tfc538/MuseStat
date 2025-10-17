@@ -19,7 +19,8 @@ from .panels import (
     create_comparison_panel,
     create_achievement_badge_panel,
     create_milestone_panel,
-    create_chapter_stats_panel
+    create_chapter_stats_panel,
+    create_density_heat_map_panel
 )
 from .tables import (
     create_semi_compact_overview,
@@ -39,7 +40,8 @@ def display_statistics(
     compact: bool = False,
     semi_compact: bool = False,
     comparison_stats: Optional[Dict] = None,
-    show_advanced: bool = False
+    show_advanced: bool = False,
+    display_options: Optional[Dict] = None
 ):
     """
     Display all statistics in a beautiful layout.
@@ -50,7 +52,26 @@ def display_statistics(
         semi_compact: Use semi-compact display mode
         comparison_stats: Optional previous stats for comparison
         show_advanced: Show advanced metrics (readability, pacing)
+        display_options: Optional dictionary with display customization:
+            - top_words: Number of frequent words to show
+            - max_chapters: Maximum chapters to display
+            - sparkline_width: Width of sparkline charts
+            - hide_word_frequency: Hide word frequency table
+            - hide_heat_map: Hide density heat map
+            - hide_chapter_details: Hide chapter breakdown table
+            - show_top_chapters: Show top N longest chapters
     """
+    # Default display options
+    if display_options is None:
+        display_options = {}
+    
+    top_words = display_options.get('top_words', 15)
+    max_chapters = display_options.get('max_chapters')
+    sparkline_width = display_options.get('sparkline_width', 40)
+    hide_word_frequency = display_options.get('hide_word_frequency', False)
+    hide_heat_map = display_options.get('hide_heat_map', False)
+    hide_chapter_details = display_options.get('hide_chapter_details', False)
+    show_top_chapters = display_options.get('show_top_chapters')
     console.clear()
     
     # Show loading animation (shorter for compact modes)
@@ -185,19 +206,34 @@ def display_statistics(
         
         # Display chapter statistics
         if stats.get('chapter_stats') and stats['chapter_stats']:
-            panel = create_chapter_stats_panel(stats['chapter_stats'])
+            chapter_lengths = [ch['words'] for ch in stats['chapters']] if stats.get('chapters') else None
+            panel = create_chapter_stats_panel(stats['chapter_stats'], chapter_lengths, sparkline_width=sparkline_width)
             if panel:
                 console.print(panel)
                 console.print()
         
-        # Display chapters table
-        if stats['chapters']:
-            console.print(create_chapters_table(stats['chapters']))
+        # Display density heat map (unless hidden)
+        if not hide_heat_map and stats.get('chapters') and len(stats['chapters']) > 1:
+            heat_map_panel = create_density_heat_map_panel(stats['chapters'])
+            if heat_map_panel:
+                console.print(heat_map_panel)
+                console.print()
+        
+        # Display top chapters summary if requested
+        if show_top_chapters and stats['chapters']:
+            from .tables import create_top_chapters_table
+            console.print(create_top_chapters_table(stats['chapters'], n=show_top_chapters))
             console.print()
         
-        # Display word frequency
-        console.print(create_word_frequency_table(stats['common_words']))
-        console.print()
+        # Display chapters table (unless hidden)
+        if not hide_chapter_details and stats['chapters']:
+            console.print(create_chapters_table(stats['chapters'], max_chapters=max_chapters, sparkline_width=sparkline_width))
+            console.print()
+        
+        # Display word frequency (unless hidden)
+        if not hide_word_frequency:
+            console.print(create_word_frequency_table(stats['common_words'], max_words=top_words))
+            console.print()
         
         # Display achievement badge and motivation
         if stats.get('badge'):

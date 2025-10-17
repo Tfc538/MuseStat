@@ -12,3 +12,6 @@ textstat>=0.7.3      # For readability metrics (Flesch-Kincaid, etc.)
 
 # Version checking
 requests>=2.28.0     # For GitHub release checking
+
+# Watch mode (optional)
+watchdog>=6.0.0      # For monitoring file changes

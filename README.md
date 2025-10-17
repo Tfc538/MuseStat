@@ -2,7 +2,7 @@
 
 Beautiful terminal UI for comprehensive manuscript analysis with advanced features for fiction writers.
 
-![Version](https://img.shields.io/badge/version-1.1.0-blue)
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
 ![Python](https://img.shields.io/badge/python-3.7+-green)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -25,6 +25,14 @@ Beautiful terminal UI for comprehensive manuscript analysis with advanced featur
 - 📈 **Progress Tracking**: Compare with previous analyses to track your writing progress
 - 🎭 **Scene Detection**: Count scene breaks within chapters
 - 🔤 **Word Frequency**: Most common words with language-aware stop word filtering
+
+### Visual Enhancements
+- ✨ **Sparkline Charts**: Inline unicode sparklines showing chapter length trends at a glance
+- 🚦 **Color-Coded Indicators**: Traffic light system (Green/Yellow/Red) for readability scores
+- 📊 **Trend Arrows**: Directional arrows (↑↓→) showing if metrics improved or declined
+- 🎨 **Heat Maps**: Visual density maps showing word and sentence distribution across chapters
+- ⚖️ **Balance Visualization**: Color-coded chapter consistency indicators
+- 📏 **Mini-Bars**: Visual progress bars in tables for quick comparison
 
 ### Smart Chapter Detection
 Recognizes multiple chapter formats:
@@ -144,6 +152,33 @@ python main.py --compare mybook.stats.json
 
 # Combine options
 python main.py -f mybook.docx --advanced --save-snapshot
+```
+
+### Display Customization
+
+```bash
+# Show top 25 most frequent words instead of default 15
+python main.py --top-words 25
+
+# Limit chapter display to first 10 chapters
+python main.py --max-chapters 10
+
+# Change minimum word length for frequency analysis (default: 3)
+python main.py --min-word-length 4
+
+# Customize sparkline width for better visibility
+python main.py --sparkline-width 60
+
+# Hide specific sections
+python main.py --hide-word-frequency  # Hide word frequency table
+python main.py --hide-heat-map        # Hide density heat map
+python main.py --hide-chapter-details # Hide chapter breakdown
+
+# Show top 5 longest chapters in summary
+python main.py --show-top-chapters 5
+
+# Combine customizations
+python main.py --top-words 30 --max-chapters 15 --sparkline-width 50
 ```
 
 ### Discovery & Information

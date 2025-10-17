@@ -5,7 +5,14 @@ Table creation functions for Rich UI display.
 from pathlib import Path
 from typing import Dict, List, Optional
 from rich.table import Table
+from rich.text import Text
 from rich import box
+
+from .visualizations import (
+    get_readability_indicator,
+    create_horizontal_bar,
+    create_sparkline
+)
 
 
 def create_overview_table(stats: Dict) -> Table:
@@ -66,7 +73,7 @@ def create_overview_table(stats: Dict) -> Table:
 
 
 def create_readability_table(readability: Dict) -> Optional[Table]:
-    """Create readability metrics table."""
+    """Create readability metrics table with color-coded indicators."""
     if not readability:
         return None
     
@@ -80,6 +87,7 @@ def create_readability_table(readability: Dict) -> Optional[Table]:
     
     table.add_column("Metric", style="bold cyan", width=35)
     table.add_column("Score", style="bold yellow", justify="right", width=10)
+    table.add_column("Indicator", justify="center", width=5)
     table.add_column("Interpretation", style="dim", width=30)
     
     # Flesch Reading Ease
@@ -99,11 +107,25 @@ def create_readability_table(readability: Dict) -> Optional[Table]:
     else:
         fre_level = "Very Difficult (Graduate)"
     
-    table.add_row("Flesch Reading Ease", f"{fre:.1f}", fre_level)
-    table.add_row("Flesch-Kincaid Grade", f"{readability['flesch_kincaid_grade']:.1f}", "US Grade Level")
-    table.add_row("Gunning Fog Index", f"{readability['gunning_fog']:.1f}", "Years of education")
-    table.add_row("Coleman-Liau Index", f"{readability['coleman_liau_index']:.1f}", "US Grade Level")
-    table.add_row("Automated Readability Index", f"{readability['automated_readability_index']:.1f}", "US Grade Level")
+    # Get color-coded indicators
+    fre_symbol, fre_color, fre_status = get_readability_indicator(fre, "flesch")
+    fk_symbol, fk_color, fk_status = get_readability_indicator(readability['flesch_kincaid_grade'], "grade")
+    gf_symbol, gf_color, gf_status = get_readability_indicator(readability['gunning_fog'], "fog")
+    cl_symbol, cl_color, cl_status = get_readability_indicator(readability['coleman_liau_index'], "grade")
+    ar_symbol, ar_color, ar_status = get_readability_indicator(readability['automated_readability_index'], "grade")
+    
+    # Create Text objects for colored indicators
+    fre_indicator = Text(fre_symbol, style=fre_color)
+    fk_indicator = Text(fk_symbol, style=fk_color)
+    gf_indicator = Text(gf_symbol, style=gf_color)
+    cl_indicator = Text(cl_symbol, style=cl_color)
+    ar_indicator = Text(ar_symbol, style=ar_color)
+    
+    table.add_row("Flesch Reading Ease", f"{fre:.1f}", fre_indicator, fre_level)
+    table.add_row("Flesch-Kincaid Grade", f"{readability['flesch_kincaid_grade']:.1f}", fk_indicator, f"{fk_status} - US Grade Level")
+    table.add_row("Gunning Fog Index", f"{readability['gunning_fog']:.1f}", gf_indicator, f"{gf_status} - Years of education")
+    table.add_row("Coleman-Liau Index", f"{readability['coleman_liau_index']:.1f}", cl_indicator, f"{cl_status} - US Grade Level")
+    table.add_row("Automated Readability Index", f"{readability['automated_readability_index']:.1f}", ar_indicator, f"{ar_status} - US Grade Level")
     
     return table
 
@@ -141,10 +163,29 @@ def create_pacing_table(pacing: Dict) -> Optional[Table]:
     return table
 
 
-def create_chapters_table(chapters: List[Dict]) -> Table:
-    """Create chapters breakdown table."""
+def create_chapters_table(chapters: List[Dict], max_chapters: Optional[int] = None, sparkline_width: int = 40) -> Table:
+    """
+    Create chapters breakdown table with visual enhancements.
+    
+    Args:
+        chapters: List of chapter dictionaries
+        max_chapters: Maximum number of chapters to display (default: all)
+        sparkline_width: Width of the sparkline chart (default: 40)
+    """
+    # Determine which chapters to display
+    display_chapters = chapters if max_chapters is None else chapters[:max_chapters]
+    
+    # Create sparkline from all chapter word counts (for overall trend)
+    chapter_lengths = [ch['words'] for ch in chapters]
+    sparkline_w = min(sparkline_width, len(chapters) * 2)
+    sparkline = create_sparkline(chapter_lengths, width=sparkline_w)
+    
+    table_title = f"Chapter Breakdown   Trend: {sparkline}"
+    if max_chapters and len(chapters) > max_chapters:
+        table_title += f"   (Showing {max_chapters} of {len(chapters)})"
+    
     table = Table(
-        title="Chapter Breakdown",
+        title=table_title,
         box=box.ROUNDED,
         border_style="magenta",
         header_style="bold magenta",
@@ -152,36 +193,55 @@ def create_chapters_table(chapters: List[Dict]) -> Table:
     )
     
     table.add_column("#", style="dim", width=5, justify="right")
-    table.add_column("Chapter Title", style="bold cyan", width=45)
+    table.add_column("Chapter Title", style="bold cyan", width=40)
     table.add_column("Words", style="bold yellow", justify="right", width=10)
     table.add_column("% of Total", style="green", justify="right", width=10)
+    table.add_column("Bar", style="bright_blue", width=15)
     table.add_column("Scenes", style="dim", justify="right", width=8)
     
     total_words = sum(ch['words'] for ch in chapters)
+    max_words = max(chapter_lengths) if chapter_lengths else 1
     
-    for i, chapter in enumerate(chapters, 1):
+    for i, chapter in enumerate(display_chapters, 1):
         percentage = (chapter['words'] / total_words * 100) if total_words > 0 else 0
         
         # Truncate long titles
         title = chapter['title']
-        if len(title) > 42:
-            title = title[:39] + "..."
+        if len(title) > 37:
+            title = title[:34] + "..."
+        
+        # Create mini bar for visual representation
+        bar_length = int((chapter['words'] / max_words) * 12)
+        bar = "█" * bar_length
         
         table.add_row(
             str(i),
             title,
             f"{chapter['words']:,}",
             f"{percentage:.1f}%",
+            bar,
             str(chapter.get('scenes', 0))
         )
     
     return table
 
 
-def create_word_frequency_table(common_words: List[tuple]) -> Table:
-    """Create most common words table."""
+def create_word_frequency_table(common_words: List[tuple], max_words: Optional[int] = None) -> Table:
+    """
+    Create most common words table.
+    
+    Args:
+        common_words: List of (word, count) tuples
+        max_words: Maximum number of words to display (default: all words up to 15, or len(common_words))
+    """
+    # Determine how many words to show
+    if max_words is None:
+        display_count = min(15, len(common_words))
+    else:
+        display_count = min(max_words, len(common_words))
+    
     table = Table(
-        title="Most Frequent Words",
+        title=f"Most Frequent Words (Top {display_count})",
         box=box.ROUNDED,
         border_style="yellow",
         header_style="bold yellow",
@@ -195,7 +255,7 @@ def create_word_frequency_table(common_words: List[tuple]) -> Table:
     
     max_count = common_words[0][1] if common_words else 1
     
-    for i, (word, count) in enumerate(common_words[:15], 1):
+    for i, (word, count) in enumerate(common_words[:display_count], 1):
         bar_length = int((count / max_count) * 25)
         bar = "█" * bar_length
         

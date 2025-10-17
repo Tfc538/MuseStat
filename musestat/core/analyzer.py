@@ -25,7 +25,13 @@ from ..utils.achievements import get_achievement_badge, estimate_reading_time
 console = Console()
 
 
-def analyze_manuscript(file_path: str, enable_advanced: bool = False, show_progress: bool = True) -> Optional[Dict]:
+def analyze_manuscript(
+    file_path: str, 
+    enable_advanced: bool = False, 
+    show_progress: bool = True,
+    top_words_count: int = 20,
+    min_word_length: int = 1
+) -> Optional[Dict]:
     """
     Analyze the manuscript and return comprehensive statistics.
     
@@ -33,6 +39,8 @@ def analyze_manuscript(file_path: str, enable_advanced: bool = False, show_progr
         file_path: Path to manuscript file
         enable_advanced: Enable advanced features (readability, dialogue, pacing)
         show_progress: Show progress indicators during analysis
+        top_words_count: Number of most frequent words to include (default: 20)
+        min_word_length: Minimum word length for frequency analysis (default: 1)
         
     Returns:
         Dictionary with all statistics, or None if analysis failed
@@ -64,7 +72,7 @@ def analyze_manuscript(file_path: str, enable_advanced: bool = False, show_progr
             progress.update(task, description="[cyan]Extracting keywords...", advance=20)
             language = detect_language(text) if enable_advanced else 'en'
             stop_words = get_language_stopwords(language)
-            common_words = get_most_common_words(text, n=20, stop_words=stop_words)
+            common_words = get_most_common_words(text, n=top_words_count, stop_words=stop_words, min_length=min_word_length)
             
             progress.update(task, description="[cyan]Finalizing...", advance=20)
     else:
@@ -80,7 +88,7 @@ def analyze_manuscript(file_path: str, enable_advanced: bool = False, show_progr
         chapters = extract_chapters(text)
         language = detect_language(text) if enable_advanced else 'en'
         stop_words = get_language_stopwords(language)
-        common_words = get_most_common_words(text, n=20, stop_words=stop_words)
+        common_words = get_most_common_words(text, n=top_words_count, stop_words=stop_words, min_length=min_word_length)
     
     # Build statistics dictionary
     stats = {

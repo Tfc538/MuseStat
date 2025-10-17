@@ -35,6 +35,15 @@ Complete documentation index with descriptions.
   - Integration guides
   - Use cases and workflows
 
+### Visual Enhancements
+- **[Visual Features Guide](visual-features.md)** (NEW!)
+  - Sparkline charts
+  - Color-coded indicators
+  - Trend arrows
+  - Heat maps
+  - Balance visualization
+  - Usage examples and benefits
+
 ---
 
 ## 🔍 Reference Documentation

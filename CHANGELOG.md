@@ -5,6 +5,55 @@ All notable changes to MuseStat will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-10-17
+
+### Added
+
+#### Display Customization CLI Options
+- **`--top-words N`**: Specify number of most frequent words to display (default: 15)
+- **`--max-chapters N`**: Limit number of chapters shown in detail view
+- **`--min-word-length N`**: Set minimum word length for frequency analysis (default: 1)
+- **`--sparkline-width N`**: Customize width of sparkline charts (default: 40)
+- **`--hide-word-frequency`**: Hide the word frequency table from display
+- **`--hide-heat-map`**: Hide the density heat map visualization
+- **`--hide-chapter-details`**: Hide individual chapter breakdown table
+- **`--show-top-chapters N`**: Display a summary table of the top N longest chapters
+
+#### UI/UX Visual Enhancements
+- **Sparkline Charts**: Inline sparklines showing chapter length trends in chapter breakdown table titles and chapter stats panel
+- **Color-Coded Indicators**: Traffic light system (●) for readability scores
+  - Green = Easy/Good
+  - Yellow = Fair/Moderate
+  - Red = Difficult/Needs Work
+- **Trend Arrows**: Directional arrows (↑↓→) in comparison panels showing if metrics improved or declined
+- **Visual Progress Bars**: Enhanced horizontal bars with unicode characters (█░) for visual progress representation
+- **Chapter Balance Visualization**: Color-coded consistency indicators in chapter statistics panel
+  - Very Consistent (CV < 15%): Green
+  - Moderately Consistent (CV < 30%): Yellow
+  - Variable (CV ≥ 30%): Red
+- **Chapter Density Heat Maps**: Visual representation of word and sentence density across chapters
+  - High density areas shown as █
+  - Low density areas shown as ░
+  - Helps identify pacing variations at a glance
+- **Mini-Bars in Tables**: Visual bars added to chapter breakdown table for quick length comparison
+
+### Improved
+- Readability table now includes color-coded indicators for at-a-glance assessment
+- Chapter stats panel now displays sparkline trends for chapter lengths
+- Comparison panel now shows directional trend arrows for each metric
+- Chapter breakdown table includes sparkline in title and mini-bars per chapter
+- Enhanced visual feedback throughout the UI for better data comprehension
+
+### Technical
+- New `visualizations.py` module with reusable visualization components:
+  - `create_sparkline()`: Generate unicode sparklines from data
+  - `create_horizontal_bar()`: Create progress bars
+  - `create_heat_map_line()`: Generate heat map visualizations
+  - `get_readability_indicator()`: Color-code readability scores
+  - `create_trend_arrow()`: Show metric trends with arrows
+  - `create_chapter_balance_visualization()`: Visualize chapter consistency
+  - Additional helper functions for charts and graphs
+
 ## [1.1.0] - 2025-10-17
 
 ### Added
@@ -135,4 +184,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Genre-specific benchmarks
 - Time-of-day analysis for writing patterns
 
+[1.2.0]: https://github.com/Tfc538/MuseStat/releases/tag/v1.2.0
+[1.1.0]: https://github.com/Tfc538/MuseStat/releases/tag/v1.1.0
+[1.0.2]: https://github.com/Tfc538/MuseStat/releases/tag/v1.0.2
+[1.0.1]: https://github.com/Tfc538/MuseStat/releases/tag/v1.0.1
 [1.0.0]: https://github.com/Tfc538/MuseStat/releases/tag/v1.0.0

@@ -4,12 +4,19 @@ Panel creation functions for Rich UI display.
 
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from rich.panel import Panel
 from rich.text import Text
 from rich import box
 
 from ..utils.achievements import get_random_quote
+from .visualizations import (
+    create_sparkline,
+    create_trend_arrow,
+    create_horizontal_bar,
+    create_heat_map_line,
+    create_multi_line_heat_map
+)
 
 
 def create_header() -> Panel:
@@ -33,7 +40,7 @@ def create_header() -> Panel:
 
 
 def create_comparison_panel(stats: Dict, old_stats: Dict) -> Panel:
-    """Create comparison panel showing changes since last analysis."""
+    """Create comparison panel showing changes since last analysis with trend arrows."""
     content = Text()
     content.append("Changes Since Last Analysis\n\n", style="bold underline cyan")
     
@@ -43,19 +50,27 @@ def create_comparison_panel(stats: Dict, old_stats: Dict) -> Panel:
     para_diff = stats['total_paragraphs'] - old_stats.get('total_paragraphs', 0)
     chap_diff = len(stats['chapters']) - old_stats.get('chapters', 0)
     
-    def format_diff(diff, label):
-        if diff > 0:
-            return f"{label}: +{diff:,}", "bold green"
-        elif diff < 0:
-            return f"{label}: {diff:,}", "bold red"
-        else:
-            return f"{label}: No change", "dim"
+    # Get trend arrows for each metric
+    metrics = [
+        (stats['total_words'], old_stats.get('total_words', 0), "Words", word_diff, True),
+        (stats['total_characters'], old_stats.get('total_characters', 0), "Characters", char_diff, True),
+        (stats['total_sentences'], old_stats.get('total_sentences', 0), "Sentences", sent_diff, True),
+        (stats['total_paragraphs'], old_stats.get('total_paragraphs', 0), "Paragraphs", para_diff, True),
+        (len(stats['chapters']), old_stats.get('chapters', 0), "Chapters", chap_diff, True)
+    ]
     
-    for diff, label in [(word_diff, "Words"), (char_diff, "Characters"), 
-                         (sent_diff, "Sentences"), (para_diff, "Paragraphs"),
-                         (chap_diff, "Chapters")]:
-        text, style = format_diff(diff, label)
-        content.append(text + "\n", style=style)
+    for current, previous, label, diff, higher_is_better in metrics:
+        arrow, arrow_color = create_trend_arrow(current, previous, higher_is_better)
+        
+        if diff > 0:
+            content.append(f"{arrow} ", style=arrow_color)
+            content.append(f"{label}: +{diff:,}\n", style="bold green")
+        elif diff < 0:
+            content.append(f"{arrow} ", style=arrow_color)
+            content.append(f"{label}: {diff:,}\n", style="bold red")
+        else:
+            content.append(f"{arrow} ", style=arrow_color)
+            content.append(f"{label}: No change\n", style="dim")
     
     # Time since last analysis
     if 'timestamp' in old_stats:
@@ -79,17 +94,49 @@ def create_comparison_panel(stats: Dict, old_stats: Dict) -> Panel:
     )
 
 
-def create_chapter_stats_panel(chapter_stats: Dict) -> Optional[Panel]:
-    """Create panel showing chapter length statistics."""
+def create_chapter_stats_panel(chapter_stats: Dict, chapter_lengths: Optional[List[int]] = None, sparkline_width: int = 40) -> Optional[Panel]:
+    """
+    Create panel showing chapter length statistics with visual enhancements.
+    
+    Args:
+        chapter_stats: Chapter statistics dictionary
+        chapter_lengths: Optional list of chapter word counts for sparkline
+        sparkline_width: Width of the sparkline chart (default: 40)
+    """
     if not chapter_stats:
         return None
     
     content = Text()
     content.append("Chapter Length Analysis\n\n", style="bold underline cyan")
     
+    # Add sparkline if chapter lengths provided
+    if chapter_lengths and len(chapter_lengths) > 0:
+        width = min(sparkline_width, len(chapter_lengths) * 2)
+        sparkline = create_sparkline(chapter_lengths, width=width)
+        content.append("Trend:     ", style="bold white")
+        content.append(f"{sparkline}\n\n", style="bright_cyan")
+    
     content.append(f"Mean:      {chapter_stats['mean']:,.0f} words\n", style="white")
     content.append(f"Std Dev:   {chapter_stats['std_dev']:,.0f} words\n", style="white")
-    content.append(f"CV:        {chapter_stats['coefficient_of_variation']:.1f}%\n\n", style="dim")
+    
+    # Add balance indicator based on coefficient of variation
+    cv = chapter_stats['coefficient_of_variation']
+    if cv < 15:
+        balance_text = "Very Consistent"
+        balance_color = "bright_green"
+        balance_symbol = "●"
+    elif cv < 30:
+        balance_text = "Moderately Consistent"
+        balance_color = "yellow"
+        balance_symbol = "●"
+    else:
+        balance_text = "Variable"
+        balance_color = "red"
+        balance_symbol = "●"
+    
+    content.append(f"CV:        {cv:.1f}% ", style="white")
+    content.append(f"{balance_symbol} ", style=balance_color)
+    content.append(f"{balance_text}\n\n", style=balance_color)
     
     content.append("Shortest:  ", style="bold yellow")
     content.append(f"{chapter_stats['min']:,} words\n", style="yellow")
@@ -351,6 +398,66 @@ def create_verification_summary(issues) -> Panel:
         border_style="bright_yellow" if errors > 0 else "bright_green",
         padding=(1, 2),
         title="[bold]Summary[/bold]",
+        title_align="left"
+    )
+
+
+def create_density_heat_map_panel(chapters: List[Dict]) -> Optional[Panel]:
+    """
+    Create a heat map panel showing sentence and paragraph density across chapters.
+    
+    Args:
+        chapters: List of chapter dictionaries with 'words' and optionally 'sentences'
+        
+    Returns:
+        Panel with heat map visualization or None if insufficient data
+    """
+    if not chapters or len(chapters) < 2:
+        return None
+    
+    content = Text()
+    content.append("Chapter Density Analysis\n\n", style="bold underline cyan")
+    
+    # Extract data for heat map
+    chapter_lengths = [ch.get('words', 0) for ch in chapters]
+    
+    # Create heat map for chapter word counts
+    if chapter_lengths:
+        heatmap = create_heat_map_line(chapter_lengths, width=50)
+        content.append("Word Density:  ", style="bold white")
+        content.append(f"{heatmap}\n", style="bright_cyan")
+        
+        # Add legend
+        min_words = min(chapter_lengths)
+        max_words = max(chapter_lengths)
+        content.append(f"               [{min_words:,} words", style="dim")
+        content.append(" " * 30, style="dim")
+        content.append(f"{max_words:,} words]\n\n", style="dim")
+    
+    # If we have sentence data, show that too
+    if chapters and 'sentences' in chapters[0]:
+        sentence_counts = [ch.get('sentences', 0) for ch in chapters]
+        if any(sentence_counts):
+            heatmap = create_heat_map_line(sentence_counts, width=50)
+            content.append("Sentence Count:", style="bold white")
+            content.append(f"{heatmap}\n", style="bright_yellow")
+            
+            min_sent = min(sentence_counts) if sentence_counts else 0
+            max_sent = max(sentence_counts) if sentence_counts else 0
+            content.append(f"               [{min_sent:,} sentences", style="dim")
+            content.append(" " * 25, style="dim")
+            content.append(f"{max_sent:,} sentences]\n\n", style="dim")
+    
+    # Add interpretation
+    content.append("\nInterpretation:\n", style="bold dim")
+    content.append("  █ = High density  |  ░ = Low density", style="dim")
+    
+    return Panel(
+        content,
+        box=box.ROUNDED,
+        border_style="cyan",
+        padding=(1, 2),
+        title="[bold]Density Heat Map[/bold]",
         title_align="left"
     )
 
