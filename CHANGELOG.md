@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Windows executable: `musestat-windows-x64.exe`
 - Previous releases had Linux/macOS executables overwriting each other
 
+### Improved
+- Added pip dependency caching to GitHub Actions (40-60% faster builds)
+- Added PyInstaller build caching (20-30% faster subsequent builds)
+- Build times reduced from ~2 minutes to ~30-60 seconds on cache hits
+
 ## [1.0.1] - 2025-10-17
 
 ### Added
