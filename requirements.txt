@@ -1,0 +1,13 @@
+# Core dependencies (required)
+rich>=13.0.0
+
+# File format support (optional)
+python-docx>=0.8.11  # For Word Document (.docx) support
+striprtf>=0.0.26     # For Rich Text Format (.rtf) support
+
+# Advanced features (optional)
+langdetect>=1.0.9    # For language detection
+textstat>=0.7.3      # For readability metrics (Flesch-Kincaid, etc.)
+
+# Version checking
+requests>=2.28.0     # For GitHub release checking

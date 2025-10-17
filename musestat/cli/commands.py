@@ -1,0 +1,410 @@
+"""
+Command-line interface for MuseStat.
+"""
+
+import argparse
+from pathlib import Path
+from datetime import datetime
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
+from rich.table import Table
+from rich.columns import Columns
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich import box
+
+from ..config import __version__
+from ..core.analyzer import analyze_manuscript
+from ..io.readers import read_manuscript, get_supported_formats_info
+from ..io.exporters import export_to_json, export_to_csv, export_to_html
+from ..utils.stats import save_stats_snapshot, load_comparison_stats
+from ..features.verification import (
+    verify_manuscript,
+    load_ignore_patterns,
+    IssueType
+)
+from ..ui.display import display_statistics, print_minimalist, list_manuscript_files
+from ..ui.panels import (
+    create_header,
+    create_compact_display,
+    create_comparison_panel,
+    create_motivation_panel,
+    create_achievement_badge_panel,
+    create_milestone_panel,
+    create_verification_checks_info,
+    create_verification_summary
+)
+from ..ui.tables import (
+    create_chapters_table,
+    create_overview_table,
+    create_readability_table,
+    create_pacing_table,
+    create_word_frequency_table,
+    create_semi_compact_overview,
+    create_verification_table
+)
+
+console = Console()
+
+
+def main():
+    """Main CLI entry point."""
+    parser = argparse.ArgumentParser(
+        description=f"MuseStat v{__version__} - Manuscript Statistics Analyzer with Advanced Features",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="Examples:\n"
+               "  %(prog)s                                 # Full detailed analysis\n"
+               "  %(prog)s -sc                             # Semi-compact view (RECOMMENDED)\n"
+               "  %(prog)s --verify                        # Check for formatting issues\n"
+               "  %(prog)s -f mybook.docx                  # Analyze specific file\n"
+               "  %(prog)s --advanced                      # Enable all advanced features\n"
+               "  %(prog)s --minimalist                    # Plain text output (editor integration)\n"
+               "  %(prog)s --export html                   # Export to HTML report\n"
+               "  %(prog)s --export json -o stats.json     # Export to custom file\n"
+               "  %(prog)s --compare old.stats.json        # Compare with previous\n"
+               "  %(prog)s --save-snapshot                 # Save stats for later comparison\n"
+               "  %(prog)s --list                          # List available files\n"
+               "\n"
+               "Display Modes: full, -sc (semi-compact), -c (compact), -m (minimalist), -v (verify)\n"
+               "Supported formats: .md, .txt, .docx, .rtf\n"
+               "Advanced features require: langdetect, textstat\n"
+               "Export formats: json, csv, html"
+    )
+    
+    parser.add_argument(
+        '--file', '-f',
+        metavar='PATH',
+        help='Path to manuscript file (default: manuscript.md)'
+    )
+    
+    parser.add_argument(
+        '--compact', '-c',
+        action='store_true',
+        help='Display compact summary (minimal info)'
+    )
+    
+    parser.add_argument(
+        '--semi-compact', '-sc',
+        action='store_true',
+        help='Display semi-compact view (balanced detail - recommended for daily use)'
+    )
+    
+    parser.add_argument(
+        '--list', '-l',
+        action='store_true',
+        help='List all manuscript files in current directory'
+    )
+    
+    parser.add_argument(
+        '--formats',
+        action='store_true',
+        help='Show supported file formats and their availability'
+    )
+    
+    parser.add_argument(
+        '--no-animation',
+        action='store_true',
+        help='Skip loading animation for faster output'
+    )
+    
+    parser.add_argument(
+        '--chapters-only',
+        action='store_true',
+        help='Show only chapter breakdown (implied compact mode)'
+    )
+    
+    parser.add_argument(
+        '--advanced', '-a',
+        action='store_true',
+        help='Enable advanced features (language detection, readability, dialogue, pacing)'
+    )
+    
+    parser.add_argument(
+        '--compare',
+        metavar='STATS_FILE',
+        help='Compare with previous stats from JSON file'
+    )
+    
+    parser.add_argument(
+        '--save-snapshot', '-s',
+        action='store_true',
+        help='Save statistics snapshot for future comparison'
+    )
+    
+    parser.add_argument(
+        '--export',
+        choices=['json', 'csv', 'html'],
+        help='Export statistics to specified format (json, csv, or html)'
+    )
+    
+    parser.add_argument(
+        '--output', '-o',
+        metavar='FILE',
+        help='Save output/report to file instead of displaying to terminal'
+    )
+    
+    parser.add_argument(
+        '--minimalist', '-m',
+        action='store_true',
+        help='Minimalist output mode for editor integration (plain text, no colors)'
+    )
+    
+    parser.add_argument(
+        '--verify', '-v',
+        action='store_true',
+        help='Verify manuscript for publishing readiness (check formatting, typos, etc.)'
+    )
+    
+    parser.add_argument(
+        '--version',
+        action='version',
+        version=f'%(prog)s {__version__}'
+    )
+    
+    args = parser.parse_args()
+    
+    # Handle special commands
+    if args.formats:
+        console.print(Panel(
+            get_supported_formats_info(),
+            title="[bold cyan]Supported File Formats & Features[/bold cyan]",
+            border_style="cyan",
+            box=box.ROUNDED
+        ))
+        return
+    
+    if args.list:
+        files = list_manuscript_files()
+        if not files:
+            console.print("[yellow]No manuscript files found in current directory.[/yellow]")
+            return
+        
+        table = Table(title="Available Manuscript Files", box=box.ROUNDED, border_style="cyan")
+        table.add_column("#", style="dim", width=4)
+        table.add_column("File Name", style="cyan")
+        table.add_column("Type", style="yellow", width=8)
+        table.add_column("Size", style="green", justify="right", width=12)
+        table.add_column("Modified", style="dim")
+        
+        for i, file in enumerate(files, 1):
+            size_kb = file.stat().st_size / 1024
+            size_str = f"{size_kb:.1f} KB" if size_kb < 1024 else f"{size_kb/1024:.1f} MB"
+            modified = datetime.fromtimestamp(file.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
+            table.add_row(
+                str(i),
+                file.name,
+                file.suffix.upper().replace('.', ''),
+                size_str,
+                modified
+            )
+        
+        console.print(table)
+        console.print("\n[dim]Use -f <filename> to analyze a specific file[/dim]")
+        return
+    
+    # Determine file path
+    file_path = args.file if args.file else "manuscript.md"
+    
+    if not Path(file_path).exists():
+        console.print(f"[bold red]Error:[/bold red] File '{file_path}' not found!")
+        console.print("\n[dim]Tip: Use --list to see available files[/dim]")
+        return
+    
+    # Load comparison stats if requested
+    comparison_stats = None
+    if args.compare:
+        comparison_stats = load_comparison_stats(args.compare)
+    
+    # Analyze manuscript (with progress bar unless minimalist or output to file)
+    show_progress = not (args.minimalist or args.output or args.no_animation)
+    stats = analyze_manuscript(file_path, enable_advanced=args.advanced, show_progress=show_progress)
+    
+    if not stats:
+        console.print("[bold red]Failed to analyze manuscript.[/bold red]")
+        return
+    
+    # Handle export first if requested
+    if args.export:
+        export_file = args.output if args.output else f"{Path(file_path).stem}.{args.export}"
+        
+        if args.export == 'json':
+            export_to_json(stats, export_file)
+        elif args.export == 'csv':
+            export_to_csv(stats, export_file)
+        elif args.export == 'html':
+            export_to_html(stats, export_file)
+        
+        # If export mode, don't display terminal output
+        if not args.output:
+            return
+    
+    # Save snapshot if requested
+    if args.save_snapshot:
+        snapshot_file = save_stats_snapshot(stats, file_path)
+        if snapshot_file:
+            console.print(f"[green]✓ Snapshot saved: {snapshot_file}[/green]\n")
+    
+    # Handle verify mode
+    if args.verify:
+        console.clear()
+        console.print(create_header())
+        console.print()
+        
+        # Load ignore patterns
+        ignore_patterns = load_ignore_patterns()
+        
+        # Run verification
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+            transient=True
+        ) as progress:
+            task = progress.add_task("[cyan]Running comprehensive verification...", total=100)
+            text = read_manuscript(file_path)
+            progress.update(task, advance=30)
+            issues = verify_manuscript(text, ignore_patterns)
+            progress.update(task, advance=70)
+        
+        # Display file info and ignore patterns status
+        file_info = Text()
+        file_info.append("File: ", style="bold")
+        file_info.append(file_path, style="cyan")
+        
+        if ignore_patterns:
+            file_info.append(f"\nIgnore patterns: ", style="bold")
+            file_info.append(f"{len(ignore_patterns)} patterns loaded from .musestatignore", style="green")
+        else:
+            file_info.append(f"\nIgnore patterns: ", style="bold")
+            file_info.append("None (create .musestatignore to ignore patterns)", style="dim")
+        
+        console.print(Panel(file_info, box=box.ROUNDED, border_style="blue"))
+        console.print()
+        
+        # Display checks info and summary side by side
+        console.print(Columns([
+            create_verification_checks_info(),
+            create_verification_summary(issues)
+        ], equal=True, expand=True))
+        console.print()
+        
+        if issues:
+            # Display detailed issues by type
+            for issue_type in [IssueType.ERROR, IssueType.WARNING, IssueType.INFO]:
+                table = create_verification_table(issues, issue_type, limit=20)
+                if table:
+                    console.print(table)
+                    console.print()
+        
+        # Footer
+        errors = sum(1 for i in issues if i.type == IssueType.ERROR)
+        footer = Text()
+        if errors > 0:
+            footer.append(f"⚠️  {errors} critical issue(s) require attention before publishing", style="bold red")
+        else:
+            footer.append("✓ All critical checks passed!", style="bold green")
+        
+        console.print(Panel(
+            footer,
+            box=box.DOUBLE_EDGE,
+            border_style="bright_yellow" if errors > 0 else "bright_green",
+            padding=(0, 2)
+        ))
+        return
+    
+    # Handle minimalist mode
+    if args.minimalist:
+        print_minimalist(stats)
+        return
+    
+    # Handle output to file
+    if args.output and not args.export:
+        console.print(f"[yellow]Note: Use --export html/json/csv to save formatted reports.[/yellow]")
+        console.print(f"[yellow]Terminal output capture coming soon. Displaying to terminal for now.[/yellow]\n")
+    
+    # Display results based on mode
+    if args.chapters_only:
+        console.clear()
+        if stats['chapters']:
+            console.print(create_chapters_table(stats['chapters']))
+        else:
+            console.print("[yellow]No chapters found in manuscript.[/yellow]")
+    else:
+        # Override animation preference
+        if args.no_animation:
+            console.clear()
+            if args.compact:
+                console.print(create_compact_display(stats))
+                if comparison_stats:
+                    console.print()
+                    console.print(create_comparison_panel(stats, comparison_stats))
+            elif args.semi_compact:
+                # Semi-compact with no animation
+                console.print(create_header())
+                console.print()
+                
+                console.print(Columns([
+                    create_semi_compact_overview(stats),
+                    create_milestone_panel(stats) if not comparison_stats else create_comparison_panel(stats, comparison_stats)
+                ], equal=True, expand=True))
+                console.print()
+                
+                if stats.get('badge'):
+                    console.print(Columns([
+                        create_achievement_badge_panel(stats['badge']),
+                        create_motivation_panel()
+                    ], equal=True, expand=True))
+                    console.print()
+                
+                # Footer
+                footer = Text()
+                footer.append("✨ Analysis Complete! ", style="bold bright_green")
+                footer.append(f"Total: {stats['total_words']:,} words", style="bold bright_yellow")
+                footer.append(" ✨", style="bold bright_green")
+                
+                console.print(Panel(
+                    footer,
+                    box=box.DOUBLE_EDGE,
+                    border_style="bright_green",
+                    padding=(0, 2)
+                ))
+            else:
+                console.print(create_header())
+                console.print()
+                
+                if comparison_stats:
+                    console.print(Columns([
+                        create_overview_table(stats),
+                        create_comparison_panel(stats, comparison_stats)
+                    ], equal=True, expand=True))
+                else:
+                    console.print(Columns([
+                        create_overview_table(stats),
+                        create_milestone_panel(stats)
+                    ], equal=True, expand=True))
+                
+                console.print()
+                
+                if args.advanced:
+                    if stats.get('readability'):
+                        table = create_readability_table(stats['readability'])
+                        if table:
+                            console.print(table)
+                            console.print()
+                    if stats.get('pacing'):
+                        table = create_pacing_table(stats['pacing'])
+                        if table:
+                            console.print(table)
+                            console.print()
+                
+                if stats['chapters']:
+                    console.print(create_chapters_table(stats['chapters']))
+                    console.print()
+                console.print(create_word_frequency_table(stats['common_words']))
+        else:
+            display_statistics(stats, compact=args.compact, semi_compact=args.semi_compact, comparison_stats=comparison_stats, show_advanced=args.advanced)
+
+
+if __name__ == "__main__":
+    main()
+
