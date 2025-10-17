@@ -26,6 +26,7 @@ from ..core.analyzer import analyze_manuscript
 from ..io.readers import read_manuscript, get_supported_formats_info
 from ..io.exporters import export_to_json, export_to_csv, export_to_html
 from ..utils.stats import save_stats_snapshot, load_comparison_stats
+from ..utils.version_check import check_for_updates, get_update_message
 from ..features.verification import (
     verify_manuscript,
     load_ignore_patterns,
@@ -435,6 +436,24 @@ def main():
     )
     
     args = parser.parse_args()
+    
+    # Check for updates (silent, non-blocking)
+    update_info = check_for_updates(silent=True)
+    if update_info:
+        console.print()
+        console.print(Panel(
+            Text.from_markup(
+                f"[bold bright_green]🎉 New version available: v{update_info['latest_version']}[/bold bright_green]\n"
+                f"[dim]Current version: v{update_info['current_version']}[/dim]\n\n"
+                f"[cyan]Download:[/cyan] {update_info['release_url']}\n"
+                f"[dim]Run with --version to see current version[/dim]"
+            ),
+            title="[bold yellow]⚡ Update Available[/bold yellow]",
+            border_style="bright_yellow",
+            box=box.ROUNDED,
+            padding=(1, 2)
+        ))
+        console.print()
     
     # Check if running in interactive mode (no file specified and no special flags)
     is_interactive = (
