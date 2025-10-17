@@ -28,10 +28,14 @@ jobs:
         run: |
           pyinstaller --onefile --name musestat --console main.py
       
+      - name: Rename Windows executable
+        run: |
+          mv dist/musestat.exe dist/musestat-windows-x64.exe
+      
       - name: Upload Windows executable
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload ${{ github.event.release.tag_name }} ./dist/musestat.exe --clobber
+        run: gh release upload ${{ github.event.release.tag_name }} ./dist/musestat-windows-x64.exe --clobber
 
   build-linux:
     runs-on: ubuntu-latest
@@ -53,10 +57,14 @@ jobs:
         run: |
           pyinstaller --onefile --name musestat --console main.py
       
+      - name: Rename Linux executable
+        run: |
+          mv dist/musestat dist/musestat-linux-x64
+      
       - name: Upload Linux executable
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload ${{ github.event.release.tag_name }} ./dist/musestat --clobber
+        run: gh release upload ${{ github.event.release.tag_name }} ./dist/musestat-linux-x64 --clobber
 
   build-macos:
     runs-on: macos-latest
@@ -78,10 +86,14 @@ jobs:
         run: |
           pyinstaller --onefile --name musestat --console main.py
       
+      - name: Rename macOS executable
+        run: |
+          mv dist/musestat dist/musestat-macos-x64
+      
       - name: Upload macOS executable
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload ${{ github.event.release.tag_name }} ./dist/musestat --clobber
+        run: gh release upload ${{ github.event.release.tag_name }} ./dist/musestat-macos-x64 --clobber
 
   update-version:
     runs-on: ubuntu-latest
