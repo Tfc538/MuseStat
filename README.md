@@ -2,7 +2,7 @@
 
 Beautiful terminal UI for comprehensive manuscript analysis with advanced features for fiction writers.
 
-![Version](https://img.shields.io/badge/version-1.2.1-blue)
+![Version](https://img.shields.io/badge/version-1.3.0-blue)
 ![Python](https://img.shields.io/badge/python-3.7+-green)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -33,6 +33,16 @@ Beautiful terminal UI for comprehensive manuscript analysis with advanced featur
 - 🎨 **Heat Maps**: Visual density maps showing word and sentence distribution across chapters
 - ⚖️ **Balance Visualization**: Color-coded chapter consistency indicators
 - 📏 **Mini-Bars**: Visual progress bars in tables for quick comparison
+
+### Badge Generation
+- 🏅 **Dynamic Badges**: Generate beautiful SVG and PNG badges for your manuscript
+- 📊 **Word Count Badge**: Display total words with modern gradient design
+- 🏆 **Achievement Badge**: Show milestone achievements
+- 📖 **Chapters Badge**: Display chapter count
+- 📄 **Pages Badge**: Show estimated reading pages
+- 🎨 **Professional Design**: Modern gradients, shadows, and polished styling
+- 💾 **Multiple Formats**: Export as SVG (scalable) or PNG (raster)
+- 📱 **Perfect for README**: Embed badges in your project documentation
 
 ### Smart Chapter Detection
 Recognizes multiple chapter formats:
@@ -154,6 +164,34 @@ python main.py --compare mybook.stats.json
 python main.py -f mybook.docx --advanced --save-snapshot
 ```
 
+### Badge Generation
+
+```bash
+# Generate SVG badges for word count and achievement
+python main.py -f mybook.md --badges wordcount,achievement
+
+# Generate both SVG and PNG badges (requires cairosvg)
+python main.py --badges wordcount,achievement,chapters,reading_time --badge-formats svg,png
+
+# Specify custom output directory
+python main.py --badges wordcount --badge-formats svg --badge-dir ./badges
+
+# In interactive mode: multi-select checkboxes for badge types and formats
+python main.py  # Then select badges from interactive menu
+```
+
+**Available Badge Types:**
+- `wordcount` - Display total word count
+- `achievement` - Show writing milestone
+- `chapters` - Display chapter count
+- `reading_time` - Show estimated pages
+
+**Output Formats:**
+- `svg` - Scalable vector graphics (default, ~1.5 KB)
+- `png` - Raster image format (~2-4 KB, requires cairosvg)
+
+Badges are saved to `./musestat/badges/{manuscript}_{badge_type}.{format}`
+
 ### Display Customization
 
 ```bash
@@ -221,6 +259,9 @@ python main.py -c --no-animation
 | `--no-animation` | | Skip loading animation |
 | `--save-snapshot` | `-s` | Save stats for comparison |
 | `--compare FILE` | | Compare with previous stats |
+| `--badges BADGES` | | Generate badges (comma-separated) |
+| `--badge-formats FORMATS` | | Badge output formats (svg,png) |
+| `--badge-dir DIR` | | Badge output directory |
 | `--help` | `-h` | Show help message |
 
 ## 📊 What You'll See

@@ -5,6 +5,36 @@ All notable changes to MuseStat will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-11-01
+
+### Added
+
+#### Badge Generation System
+- **Dynamic Badge Generation**: Generate beautiful, modern SVG and PNG badges for your manuscript
+- **Multiple Badge Types**:
+  - **Word Count Badge**: Shows total word count with emerald green gradient
+  - **Achievement Badge**: Displays milestone achievements with vibrant blue gradient
+  - **Chapters Badge**: Shows chapter count with purple/lavender gradient
+  - **Reading Pages Badge**: Shows estimated page count with amber/gold gradient
+- **Multiple Output Formats**:
+  - SVG badges (~1.5 KB each): lightweight, scalable, perfect for web/README
+  - PNG badges (~2–4 KB each): raster format for direct embedding
+- **CLI Support**: 
+  - `--badges` flag: comma-separated list (e.g., `--badges wordcount,achievement,chapters`)
+  - `--badge-formats` flag: choose output formats (svg, png, or both)
+  - `--badge-dir` flag: customize output directory (default: `./musestat/badges`)
+- **Interactive Mode Support**:
+  - Multi-select checkbox interface for badge types
+  - Multi-select for output formats
+  - Seamless integration with existing interactive TUI
+- **Dependencies**: Added optional `cairosvg` for PNG conversion
+
+### Technical
+- New `musestat/io/badges.py` module with badge generation utilities
+- Enhanced CLI argument parsing for badge options
+- Interactive mode extended with questionary checkbox support
+- SVG rendering with linearGradient, filter effects, and modern styling
+
 ## [1.2.1] - 2025-10-17
 
 ### Fixed
@@ -198,6 +228,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Genre-specific benchmarks
 - Time-of-day analysis for writing patterns
 
+[1.3.0]: https://github.com/Tfc538/MuseStat/releases/tag/v1.3.0
 [1.2.1]: https://github.com/Tfc538/MuseStat/releases/tag/v1.2.1
 [1.2.0]: https://github.com/Tfc538/MuseStat/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Tfc538/MuseStat/releases/tag/v1.1.0

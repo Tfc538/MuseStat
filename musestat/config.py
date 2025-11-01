@@ -2,7 +2,7 @@
 Configuration constants for MuseStat.
 """
 
-__version__ = "1.2.1"
+__version__ = "1.3.0"
 __author__ = "Tim Gatzke"
 __email__ = "post@tim-gatzke.de"
 __website__ = "https://tim-gatzke.de"
