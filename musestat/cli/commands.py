@@ -4,6 +4,7 @@ Command-line interface for MuseStat.
 
 import sys
 import argparse
+import os
 from pathlib import Path
 from datetime import datetime
 from rich.console import Console
@@ -25,6 +26,7 @@ from ..config import __version__
 from ..core.analyzer import analyze_manuscript
 from ..io.readers import read_manuscript, get_supported_formats_info
 from ..io.exporters import export_to_json, export_to_csv, export_to_html
+from ..io.badges import generate_badges
 from ..utils.stats import save_stats_snapshot, load_comparison_stats
 from ..utils.version_check import check_for_updates, get_update_message
 from ..features.verification import (
@@ -251,6 +253,41 @@ def interactive_mode():
         'advanced': analysis_choice == "4",
         'verify': analysis_choice == "5"
     }
+
+    # Badge selection (interactive only)
+    if QUESTIONARY_AVAILABLE:
+        try:
+            badge_choices = [
+                questionary.Choice("Achievement (milestone)", value='achievement'),
+                questionary.Choice("Word Count", value='wordcount'),
+                questionary.Choice("Chapters", value='chapters'),
+                questionary.Choice("Reading Pages", value='reading_time'),
+            ]
+
+            selected_badges = questionary.checkbox(
+                "Select badges to generate (space to toggle, Enter to continue):",
+                choices=badge_choices,
+                style=custom_style
+            ).ask()
+
+            if selected_badges:
+                options['badges'] = selected_badges
+
+                format_choices = [
+                    questionary.Choice("SVG", value='svg'),
+                    questionary.Choice("PNG (requires cairosvg)", value='png')
+                ]
+
+                selected_formats = questionary.checkbox(
+                    "Select output formats:",
+                    choices=format_choices,
+                    style=custom_style
+                ).ask()
+
+                options['badge_formats'] = selected_formats or ['svg']
+        except Exception:
+            # If any interactive badge selection fails, ignore and continue
+            pass
     
     return selected_file, options
 
@@ -350,6 +387,25 @@ def main():
         '--export',
         choices=['json', 'csv', 'html'],
         help='Export statistics to specified format (json, csv, or html)'
+    )
+
+    parser.add_argument(
+        '--badges',
+        metavar='BADGES',
+        help='Comma-separated list of badges to generate (achievement,wordcount,chapters,reading_time)'
+    )
+
+    parser.add_argument(
+        '--badge-formats',
+        metavar='FORMATS',
+        default='svg',
+        help='Comma-separated badge output formats (svg,png). png requires cairosvg.'
+    )
+
+    parser.add_argument(
+        '--badge-dir',
+        metavar='DIR',
+        help='Directory to save generated badges (default: ./musestat/badges)'
     )
     
     parser.add_argument(
@@ -481,6 +537,13 @@ def main():
         elif options.get('advanced'):
             args.advanced = True
         # else: full mode (default)
+        # Pass badge options from interactive mode into args
+        if options.get('badges'):
+            # store lists directly on args for later handling
+            args.badges = options.get('badges')
+            args.badge_formats = options.get('badge_formats', ['svg'])
+            # default output directory
+            args.badge_dir = None
     
     # Handle special commands
     if args.formats:
@@ -572,6 +635,33 @@ def main():
         snapshot_file = save_stats_snapshot(stats, file_path)
         if snapshot_file:
             console.print(f"[green]✓ Snapshot saved: {snapshot_file}[/green]\n")
+
+    # Badge generation (CLI or interactive)
+    badge_request = None
+    if hasattr(args, 'badges') and args.badges:
+        # args.badges from argparse is a comma-separated string
+        if isinstance(args.badges, str):
+            badge_request = [b.strip() for b in args.badges.split(',') if b.strip()]
+        else:
+            # from interactive mode (already a list)
+            badge_request = args.badges
+
+    if badge_request:
+        # Determine formats
+        if hasattr(args, 'badge_formats') and isinstance(args.badge_formats, (list, tuple)):
+            formats = args.badge_formats
+        else:
+            formats = [f.strip() for f in (args.badge_formats or 'svg').split(',') if f.strip()]
+
+        out_dir = args.badge_dir if args.badge_dir else None
+
+        try:
+            created = generate_badges(stats, badge_request, formats, out_dir=out_dir)
+            if created:
+                for p in created:
+                    console.print(f"[green]Saved:[/green] {p}")
+        except Exception as e:
+            console.print(f"[red]Error generating badges: {e}[/red]")
     
     # Handle verify mode
     if args.verify:

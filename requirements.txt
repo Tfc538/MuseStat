@@ -15,3 +15,6 @@ requests>=2.28.0     # For GitHub release checking
 
 # Watch mode (optional)
 watchdog>=6.0.0      # For monitoring file changes
+
+# Badge generation (optional)
+cairosvg>=2.8.2      # For SVG to PNG conversion (badges)
