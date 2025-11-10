@@ -89,7 +89,7 @@ jobs:
     
     steps:
     - name: Comment on first-time PR
-      uses: actions/first-interaction@v1
+      uses: actions/first-interaction@v3
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         pr-message: |
